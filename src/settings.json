@@ -1,22 +1,22 @@
 {
-  "name": "SkyzBotz Api",
+  "name": "FadXD My Api",
   "version": "v3.0.0",
-  "description": "Simple and easy to use API for WhatsApp Bot feature.",
+  "description": "Penggunaan Api Untuk Akses Bot Whatsapp Anda Hanya ada disini.",
   "header": {
-    "status": "Active!"
+    "status": "Activated!"
   },
   "apiSettings": {
-    "creator": "KyzzBotz", 
-    "apikey": ["new2025"]
+    "creator": "FadXDXyz", 
+    "apikey": ["fadcode"]
   },
   "links": [
     {
       "name": "Source Code",
-      "url": "https://github.com/rynxzyy/Rynn-UI"
+      "url": "https://github.com/fadguygyz/mypay"
     },
     {
       "name": "Contact Me",
-      "url": "https://whatsapp.com/channel/0029VaYoztA47XeAhs447Y1s"
+      "url": "https://whatsapp.com/channel/0029Var9lmyLCoX4cLSt1Q3U"
     }
   ],
   "categories": [
@@ -42,13 +42,13 @@
           "name": "Create Payment",
           "desc": "Create qris payment", 
           "path": "/orderkuota/createpayment?apikey=&amount=&codeqr=", 
-          "innerDesc": "Buy apikey >> wa.me/6283170213967"
+          "innerDesc": "Buy apikey >> wa.me/6289508589392"
         },
         {
           "name": "Cek Status",
           "desc": "Cek status payment", 
           "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
-          "innerDesc": "Buy apikey >> wa.me/6283170213967"          
+          "innerDesc": "Buy apikey >> wa.me/6289508589392"          
         }
       ]
     },    
