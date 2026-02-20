@@ -1,74 +1,207 @@
-<style>
-
-/* FORCE PROFESSIONAL DARK MODE */
+/* ============================= */
+/* PROFESSIONAL DARK DASHBOARD */
+/* ============================= */
 
 body {
-    background: #0f172a !important;
-    color: #e2e8f0 !important;
+    font-family: 'Poppins', sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 25px 30px;
 }
 
+body.no-scroll {
+    overflow: hidden;
+}
+
+/* NAVBAR */
 .navbar {
-    background: #111827 !important;
-    border-bottom: 1px solid #334155 !important;
+    background-color: #111827;
+    padding: 12px 15px;
+    position: fixed;
+    top: -30vh;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    border-bottom: 1px solid #334155;
+    transition: box-shadow 0.3s ease;
 }
 
+.navbar.scrolled {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    color: #fff !important;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.navbar-brand.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* VERSION BADGE */
+#versionHeader {
+    background: #0ea5e9;
+    color: #fff;
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+}
+
+/* HERO CARD */
 .hero-section {
-    background: #1e293b !important;
-    border: 1px solid #334155 !important;
-    border-radius: 12px !important;
-    color: #e2e8f0 !important;
+    padding: 20px 25px;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: 0.2s ease;
 }
 
 .hero-section:hover {
-    background: #273449 !important;
+    background-color: #273449;
 }
 
-.text-muted {
+.hero-section > div {
+    width: 70%;
+}
+
+.hero-section .text-muted {
+    font-size: 0.8rem;
     color: #94a3b8 !important;
 }
 
+/* TITLE */
 #name {
-    color: #ffffff !important;
-    animation: none !important;
+    font-size: 30px;
+    font-weight: 700;
+    color: #ffffff;
 }
 
-#version,
-#versionHeader {
-    background: #0ea5e9 !important;
-    color: #fff !important;
-    border-radius: 6px !important;
+#version {
+    background-color: #0ea5e9;
+    color: white;
+    padding: 4px 10px;
+    font-size: 11px;
+    border-radius: 6px;
 }
 
+/* DESCRIPTION */
+.lead {
+    font-size: 15px;
+    color: #94a3b8;
+}
+
+/* BUTTON */
 .btn-dark {
-    background: #0ea5e9 !important;
-    border: none !important;
-    border-radius: 6px !important;
+    background-color: #0ea5e9;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s ease;
 }
 
 .btn-dark:hover {
-    background: #0284c7 !important;
+    background-color: #0284c7;
 }
 
+/* SEARCH */
 #searchInput {
     background: #1e293b !important;
     border: 1px solid #334155 !important;
     color: #fff !important;
 }
 
-.modal-content {
-    background: #1e293b !important;
-    border: 1px solid #334155 !important;
+#searchInput:focus {
+    border-color: #0ea5e9 !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
+/* MODAL */
+.modal-content {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 14px;
+}
+
+.modal-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-dialog {
+    margin: 20px;
+}
+
+/* CODE BLOCK */
 #apiResponseContent,
 #apiEndpoint {
-    background: #0f172a !important;
-    border: 1px solid #334155 !important;
-    color: #38bdf8 !important;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 12px;
+    color: #38bdf8;
 }
 
+/* INVALID INPUT */
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+/* LINKS */
+#apiLinks a {
+    display: block;
+    color: #38bdf8;
+    text-decoration: none;
+    margin-bottom: 0.4rem;
+}
+
+#apiLinks a:hover {
+    color: #fff;
+}
+
+/* LOADING */
 #loadingScreen {
-    background: #0f172a !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #0f172a;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-</style>
+/* SCROLLBAR */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
