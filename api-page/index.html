@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#050b12">
+  <meta name="theme-color" content="#03070d">
   <meta name="description" content="FadXD API — Simple, Practical, and Powerful.">
   <link rel="icon" href="/src/icon.png" type="image/png">
   <title id="page">FadXD API</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <script>
-    // Disable browser zoom gestures and keyboard shortcuts.
     document.addEventListener("wheel", event => { if (event.ctrlKey) event.preventDefault(); }, { passive: false });
-    document.addEventListener("keydown", event => {
-      if (event.ctrlKey && ["+", "-", "=", "0"].includes(event.key)) event.preventDefault();
-    });
+    document.addEventListener("keydown", event => { if (event.ctrlKey && ["+", "-", "=", "0"].includes(event.key)) event.preventDefault(); });
     document.addEventListener("gesturestart", event => event.preventDefault(), { passive: false });
     document.addEventListener("gesturechange", event => event.preventDefault(), { passive: false });
     document.addEventListener("gestureend", event => event.preventDefault(), { passive: false });
@@ -25,13 +22,11 @@
 </head>
 <body>
   <div id="loadingScreen"><div class="loader-core"></div><p>INITIALIZING FADXD SYSTEM</p></div>
-  <nav class="navbar">
-    <div class="container nav-inner">
-      <a class="navbar-brand" href="#"><span class="brand-mark"><img src="/anime-avatar.svg" alt="Anime girl avatar"></span><span id="header">FADXD API</span><span id="versionHeader" class="version-chip"></span></a>
-      <div class="nav-links"><a href="#home">HOME</a><a href="#api">API LIST</a><a href="#about">ABOUT</a></div>
-      <button id="profileMenuButton" class="profile-menu-button" type="button" aria-label="Open profile menu" aria-expanded="false" aria-controls="profileDrawer"><span></span><span></span><span></span></button>
-    </div>
-  </nav>
+  <nav class="navbar"><div class="container nav-inner">
+    <a class="navbar-brand" href="#"><span class="brand-mark"><img src="/anime-avatar.svg" alt="Anime girl avatar"></span><span id="header">FADXD API</span><span id="versionHeader" class="version-chip"></span></a>
+    <div class="nav-links"><a href="#home">HOME</a><a href="#api">API LIST</a><a href="#about">ABOUT</a></div>
+    <button id="profileMenuButton" class="profile-menu-button" type="button" aria-label="Open profile menu" aria-expanded="false" aria-controls="profileDrawer"><span></span><span></span><span></span></button>
+  </div></nav>
   <div id="profileOverlay" class="profile-overlay"></div>
   <aside id="profileDrawer" class="profile-drawer" aria-hidden="true" aria-label="Profile menu">
     <div class="drawer-header"><div class="drawer-label">PERSONAL PROFILE</div><button id="closeProfileDrawer" class="drawer-close" type="button" aria-label="Close profile menu">&times;</button></div>
@@ -53,7 +48,7 @@
         <div class="hero-actions"><a class="btn-primary-glow" href="#api">EXPLORE API <span>↗</span></a><div id="apiLinks" class="hero-extra-links"></div></div>
         <div class="hero-stats"><div><strong>24/7</strong><small>SERVICE</small></div><i></i><div><strong>FAST</strong><small>RESPONSE</small></div><i></i><div><strong>V3</strong><small>PLATFORM</small></div></div>
       </div>
-      <div class="hero-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-glow"></div><div class="art-monogram">F<span>X</span></div><div class="art-caption">FADXD // DIGITAL CORE</div></div>
+      <div class="hero-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-glow"></div><img class="hero-anime" src="/anime-avatar.svg" alt=""><div class="art-caption">FADXD // DIGITAL CORE</div></div>
       <div class="hero-version" id="version"></div>
     </section>
     <section class="api-section container" id="api">
