@@ -1,12 +1,12 @@
 {
-  "name": "FadXD My Api",
+  "name": "Fad Simple Web",
   "version": "v3.0.0",
-  "description": "Penggunaan Api Untuk Akses Bot Whatsapp Anda Hanya ada disini.",
+  "description": "Penggunaan Api Anda Hanya ada disini.",
   "header": {
-    "status": "Activated!"
+    "status": "Active"
   },
   "apiSettings": {
-    "creator": "FadXDXyz", 
+    "creator": "FadStore", 
     "apikey": ["fadcode"]
   },
   "links": [
@@ -42,13 +42,13 @@
           "name": "Create Payment",
           "desc": "Create qris payment", 
           "path": "/orderkuota/createpayment?apikey=&amount=&codeqr=", 
-          "innerDesc": "Buy apikey >> wa.me/6289508589392"
+          "innerDesc": "Buy apikey >> wa.me/6285273114090"
         },
         {
           "name": "Cek Status",
           "desc": "Cek status payment", 
           "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=", 
-          "innerDesc": "Buy apikey >> wa.me/6289508589392"          
+          "innerDesc": "Buy apikey >> wa.me/6285273114090"          
         }
       ]
     },    
