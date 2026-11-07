@@ -461,7 +461,7 @@ function collectDownloadLinks(value, label = 'Download', output = [], seen = new
         Object.entries(value).forEach(([key, child]) => {
             const nextLabel = child && typeof child === 'object'
                 ? (child.quality || child.format || child.label || key)
-                : (typeof child === 'string' && (child.startsWith('http://') || child.startsWith('https://')) ? label : key);
+                : (typeof child === 'string' && (child.startsWith('http://') || child.startsWith('https://')) ? key : key);
             collectDownloadLinks(child, String(nextLabel), output, seen);
         });
     }
