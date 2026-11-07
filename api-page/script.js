@@ -445,7 +445,10 @@ function openApiModal(item) {
 function collectDownloadLinks(value, label = 'Download', output = [], seen = new Set()) {
     if (!value) return output;
     if (typeof value === 'string') {
-        if (/^https?:\\/\\//i.test(value) && /\\.(mp3|mp4|m4a|webm|mkv|jpg|jpeg|png)(?:[?#]|$)/i.test(value)) {
+        const isHttpUrl = value.startsWith('https://') || value.startsWith('http://');
+        const looksLikeMedia = /[.](mp3|mp4|m4a|webm|mkv|jpg|jpeg|png)(?:[?#]|$)/i.test(value);
+        const downloadContext = /(download|video|audio|mp3|mp4|file|link|url)/i.test(label);
+        if (isHttpUrl && (looksLikeMedia || downloadContext) && !/(thumbnail|avatar|cover|image)/i.test(label)) {
             if (!seen.has(value)) { seen.add(value); output.push({ label, url: value }); }
         }
         return output;
@@ -458,7 +461,7 @@ function collectDownloadLinks(value, label = 'Download', output = [], seen = new
         Object.entries(value).forEach(([key, child]) => {
             const nextLabel = child && typeof child === 'object'
                 ? (child.quality || child.format || child.label || key)
-                : key;
+                : (typeof child === 'string' && (child.startsWith('http://') || child.startsWith('https://')) ? label : key);
             collectDownloadLinks(child, String(nextLabel), output, seen);
         });
     }
