@@ -12,7 +12,7 @@ function getYoutubeId(value) {
 
 async function convertYoutube(url, format) {
     const id = getYoutubeId(url);
-    if (!id || !/^[\\w-]{11}$/.test(id)) throw new Error('Link YouTube tidak valid.');
+    if (!id || !/^[\w-]{11}$/.test(id)) throw new Error('Link YouTube tidak valid.');
     const headers = {
         accept: '*/*',
         'accept-language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
