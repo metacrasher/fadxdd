@@ -392,7 +392,9 @@ function openApiModal(item) {
 
     title.textContent = item.name || 'API Service';
     description.textContent = item.desc || '';
-    endpoint.textContent = item.path || '';
+    // Keep internal route paths out of the user-facing modal.
+    endpoint.textContent = '';
+    endpoint.classList.add('d-none');
     inputContainer.innerHTML = '';
     if (responseContent) { responseContent.textContent = ''; responseContent.classList.add('d-none'); }
 
@@ -436,6 +438,33 @@ function openApiModal(item) {
         inputContainer.appendChild(note);
     }
     if (apiModalInstance) apiModalInstance.show();
+}
+
+function isValidHttpUrl(value) {
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+function isValidYouTubeUrl(value) {
+    if (!isValidHttpUrl(value)) return false;
+    try {
+        const parsed = new URL(value);
+        const host = parsed.hostname.toLowerCase().replace(/^www\\./, '');
+        const validHost = host === 'youtu.be' || host === 'youtube.com' ||
+            host === 'm.youtube.com' || host === 'youtube-nocookie.com' ||
+            host.endsWith('.youtube.com');
+        if (!validHost) return false;
+        const videoId = host === 'youtu.be'
+            ? parsed.pathname.split('/').filter(Boolean)[0]
+            : parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop();
+        return /^[\\w-]{11}$/.test(videoId || '');
+    } catch {
+        return false;
+    }
 }
 
 /* =========================================
@@ -611,13 +640,21 @@ async function executeApiRequest() {
             mode = document.getElementById('yt-mode')?.value || 'video';
             quality = document.getElementById('yt-quality')?.value || 'best';
             const videoUrl = url.searchParams.get('url');
-            if (!videoUrl) throw new Error('Link YouTube wajib diisi.');
+            if (!isValidYouTubeUrl(videoUrl)) throw new Error('masukan link youtube yang valid');
             url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
             url.searchParams.set('url', videoUrl);
         }
 
         for (const input of document.querySelectorAll('#apiQueryInputContainer .api-param-input')) {
-            if (!input.value.trim()) throw new Error(`Kolom ${input.dataset.parameter} wajib diisi.`);
+            const value = input.value.trim();
+            if (!value) throw new Error(`Kolom ${input.dataset.parameter} wajib diisi.`);
+            if (input.dataset.parameter.toLowerCase() === 'url') {
+                if (item.id === 'youtube') {
+                    if (!isValidYouTubeUrl(value)) throw new Error('masukan link youtube yang valid');
+                } else if (!isValidHttpUrl(value)) {
+                    throw new Error('Masukan link yang valid.');
+                }
+            }
         }
 
         const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(60000) });
