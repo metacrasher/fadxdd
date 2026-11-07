@@ -145,3 +145,33 @@ body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;back
  .api-grid{grid-template-columns:1fr}
  .api-item{min-height:0}
 }
+
+
+/* FadXD homepage polish: anime identity, clean endpoint cards */
+.hero{min-height:640px;isolation:isolate}
+.hero-copy{max-width:660px;margin-left:clamp(280px,35vw,420px)}
+.hero-art{left:0;right:auto;width:430px;height:500px;overflow:visible}
+.hero-anime{width:350px;height:440px;object-fit:cover;object-position:center 28%;border-radius:48% 48% 22px 22px;border:1px solid rgba(0,234,255,.72);box-shadow:0 0 24px rgba(0,234,255,.28),0 0 90px rgba(0,116,255,.22);mask-image:linear-gradient(to bottom,#000 82%,transparent 100%)}
+.art-caption{display:none!important}
+.art-glow{width:330px;height:330px;background:rgba(0,205,255,.24);filter:blur(72px)}
+.ring-one{width:405px;height:405px}
+.ring-two{width:350px;height:455px}
+.api-item-path{display:none!important}
+.api-item{border-radius:12px;padding:22px;background:linear-gradient(145deg,rgba(10,31,47,.96),rgba(4,13,23,.98));transition:transform .25s,border-color .25s,box-shadow .25s}
+.api-item-desc{min-height:30px;line-height:1.65}
+.api-open-button{border-radius:6px;padding:10px 16px;text-transform:uppercase;letter-spacing:1px}
+.api-open-button:after{content:"  ↗"}
+@media(max-width:900px){
+ .hero{min-height:600px}
+ .hero-copy{margin-left:245px;max-width:calc(100% - 245px)}
+ .hero-art{left:-70px;width:300px;height:390px}
+ .hero-anime{width:260px;height:340px}
+ .ring-one{width:310px;height:310px}.ring-two{width:270px;height:360px}
+}
+@media(max-width:650px){
+ .hero{min-height:690px}
+ .hero-art{left:50%;top:8px;transform:translateX(-50%);width:245px;height:285px}
+ .hero-anime{width:178px;height:225px}
+ .ring-one{width:235px;height:235px}.ring-two{width:205px;height:265px}
+ .hero-copy{margin:0;width:100%;max-width:none}
+}

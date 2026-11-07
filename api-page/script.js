@@ -234,7 +234,7 @@ function renderCategories(categories) {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'api-open-button';
-            button.textContent = 'Try Endpoint';
+            button.textContent = 'Cek Sekarang';
 
             button.addEventListener('click', () => {
                 openApiModal(item);
