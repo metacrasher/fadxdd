@@ -66,3 +66,82 @@ body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;back
 @media(min-width:1200px){.api-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.hero-copy{margin-left:185px}.hero-art{left:-65px;width:280px}.hero-anime{width:215px;height:290px}.api-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.hero{min-height:590px;padding-top:45px;padding-bottom:45px;align-items:flex-end}.hero-art{left:50%;top:22px;transform:translateX(-50%);width:210px;height:230px;opacity:.7}.hero-anime{width:145px;height:190px}.ring-one{width:205px;height:205px}.ring-two{width:175px;height:225px}.art-glow{width:140px;height:140px}.art-caption{font-size:7px;bottom:0}.hero-copy{margin:0;width:100%;text-align:center}.hero-copy .eyebrow{justify-content:center;font-size:8px;letter-spacing:1.4px}.hero-kicker{margin-top:24px;font-size:9px;letter-spacing:2.5px}.hero h1{font-size:clamp(52px,15vw,76px);letter-spacing:-4px}.hero-description{font-size:12px;margin:17px auto}.hero-actions{justify-content:center}.hero-stats{justify-content:center;margin-top:30px}.hero-version{right:10px;bottom:8px}.api-grid{grid-template-columns:1fr}.section-heading h2{font-size:29px}.navbar-brand{font-size:12px}.brand-mark{width:36px;height:36px}}
+
+
+/* ===== FadXD reference layout refinement ===== */
+.nav-inner{min-height:48px}
+.navbar-brand{gap:12px}
+.brand-mark{width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:#061321}
+.nav-links{align-items:center;gap:clamp(18px,2.6vw,36px)}
+.nav-links a{position:relative;padding:12px 0;color:#a9c1ce;font-size:10px;font-weight:700}
+.nav-links a:after{content:"";position:absolute;left:0;right:100%;bottom:5px;height:1px;background:var(--cyan);box-shadow:0 0 10px var(--cyan);transition:right .22s}
+.nav-links a:hover:after{right:0}
+.hero{max-width:1200px;min-height:620px;padding-top:68px;padding-bottom:72px}
+.hero-copy{max-width:650px;margin-left:clamp(245px,29vw,360px)}
+.hero-copy .eyebrow{font-size:10px}
+.hero-kicker{margin-top:38px}
+.hero h1{font-size:clamp(66px,8.2vw,108px);letter-spacing:-5px}
+.hero-description{max-width:430px;font-size:14px;line-height:1.9}
+.hero-art{left:-2%;width:390px;height:440px}
+.hero-anime{width:286px;height:360px;object-fit:cover;object-position:center 35%;border-radius:48% 48% 18% 18%;background:#071522}
+.art-ring{pointer-events:none}
+.hero-actions{gap:20px}
+.btn-primary-glow{min-height:48px;padding:0 22px;clip-path:none;border-radius:3px}
+.hero-extra-links{gap:12px}
+.hero-extra-links .api-link{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 17px;border:1px solid rgba(0,234,255,.42);border-radius:3px;color:#d9faff;font:600 9px Orbitron,sans-serif;letter-spacing:1px;transition:.2s}
+.hero-extra-links .api-link:first-child:before{content:"↗";margin-right:9px;color:var(--cyan)}
+.hero-extra-links .api-link:hover{border-color:var(--cyan);background:rgba(0,234,255,.08);box-shadow:var(--glow)}
+.hero-stats{gap:26px}
+.hero-version{font:10px Orbitron,sans-serif;letter-spacing:1px}
+.api-section{max-width:1200px}
+.section-heading{margin-bottom:32px}
+.section-heading h2{font-size:clamp(30px,4vw,44px)}
+.api-grid{gap:17px}
+.api-item{border-radius:8px;min-height:190px}
+.api-item-name{font-size:13px}
+.api-item-path{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.profile-avatar{width:100px;height:100px;overflow:visible;padding:3px}
+.profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;border:1px solid rgba(0,234,255,.7);box-shadow:0 0 24px rgba(0,234,255,.25)}
+.profile-avatar i{z-index:2}
+.profile-name{letter-spacing:.5px}
+.drawer-header{background:rgba(0,234,255,.025)}
+.social-link{transition:border-color .2s,transform .2s,background .2s}
+.social-link:hover{transform:translateX(-3px);border-color:rgba(0,234,255,.5);background:rgba(0,234,255,.06);color:#fff}
+.site-footer{font-size:9px}
+@media(max-width:900px){
+ .hero{min-height:570px}
+ .hero-copy{margin-left:220px;max-width:calc(100% - 220px)}
+ .hero-art{left:-55px;width:290px;height:360px}
+ .hero-anime{width:220px;height:300px}
+ .hero h1{font-size:clamp(58px,8vw,82px)}
+ .nav-links{gap:16px}
+}
+@media(max-width:650px){
+ .nav-inner{gap:10px}
+ .navbar-brand{font-size:11px;gap:8px}
+ .brand-mark{width:36px;height:36px;flex-basis:36px}
+ .nav-links{display:none}
+ .profile-menu-button{flex:0 0 40px}
+ .hero{min-height:690px;padding:28px 18px 45px;align-items:flex-end}
+ .hero-art{left:50%;top:12px;transform:translateX(-50%);width:245px;height:285px;opacity:1}
+ .hero-anime{width:178px;height:225px;object-position:center 30%}
+ .ring-one{width:235px;height:235px}
+ .ring-two{width:205px;height:265px}
+ .art-glow{width:160px;height:160px}
+ .art-caption{bottom:2px;font-size:7px}
+ .hero-copy{margin:0;width:100%;max-width:none;text-align:center}
+ .hero-copy .eyebrow{justify-content:center}
+ .hero-kicker{margin:20px 0 9px}
+ .hero h1{font-size:clamp(54px,15vw,78px);letter-spacing:-4px}
+ .hero-description{max-width:340px;margin:16px auto;font-size:12px}
+ .hero-actions{justify-content:center;gap:10px}
+ .btn-primary-glow{min-height:44px;padding:0 16px;font-size:9px}
+ .hero-extra-links .api-link{min-height:44px;padding:0 12px;font-size:8px}
+ .hero-stats{justify-content:center;gap:17px;margin-top:27px}
+ .hero-stats strong{font-size:14px}
+ .hero-version{right:12px;bottom:8px}
+ .api-section{padding:48px 18px 62px}
+ .section-heading h2{font-size:28px}
+ .api-grid{grid-template-columns:1fr}
+ .api-item{min-height:0}
+}
