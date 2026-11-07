@@ -496,7 +496,7 @@ function renderApiResult(container, data, mode, quality) {
     container.innerHTML = '';
     if (mode === 'video' || mode === 'audio') {
         const info = findMediaMetadata(data);
-        if (info.thumbnail && /^https?:\\/\\//i.test(info.thumbnail)) {
+        if (info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
             const image = document.createElement('img');
