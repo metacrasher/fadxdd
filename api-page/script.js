@@ -166,100 +166,92 @@ function renderLinks(links) {
 function renderCategories(categories) {
     const container = document.getElementById('apiContent');
     if (!container) return;
-
     container.innerHTML = '';
 
     categories.forEach((category, categoryIndex) => {
         if (!category || !Array.isArray(category.items)) return;
-
         const section = document.createElement('section');
         section.className = 'api-category mb-5';
         section.dataset.category = category.name || '';
-
         const heading = document.createElement('div');
         heading.className = 'category-heading mb-3';
-
         const title = document.createElement('h3');
         title.className = 'category-title';
         title.textContent = category.name || `Category ${categoryIndex + 1}`;
-
         const count = document.createElement('span');
         count.className = 'category-count';
-        count.textContent = `${category.items.length} ENDPOINTS`;
-
+        count.textContent = `${category.items.length} SERVICES`;
         heading.append(title, count);
-
         const grid = document.createElement('div');
         grid.className = 'api-grid';
 
-        const sortedItems = [...category.items].sort((a, b) =>
-            String(a.name || '').localeCompare(String(b.name || ''))
-        );
-
-        sortedItems.forEach(item => {
+        category.items.forEach(item => {
             if (!item || !item.path) return;
-
             const card = document.createElement('article');
             card.className = 'api-item';
-
             card.dataset.name = String(item.name || '').toLowerCase();
             card.dataset.desc = String(item.desc || '').toLowerCase();
             card.dataset.path = String(item.path || '').toLowerCase();
             card.dataset.category = String(category.name || '').toLowerCase();
-
             const top = document.createElement('div');
             top.className = 'api-item-top';
-
             const method = document.createElement('span');
             method.className = 'api-method';
             method.textContent = 'GET';
-
             const endpointName = document.createElement('h4');
             endpointName.className = 'api-item-name';
-            endpointName.textContent = item.name || 'Unnamed Endpoint';
-
+            endpointName.textContent = item.name || 'API Service';
             top.append(method, endpointName);
+
+            const status = document.createElement('span');
+            status.className = 'api-health is-unknown';
+            status.innerHTML = '<i></i><span>Belum dicek</span>';
+            status.dataset.healthFor = item.id || item.name;
 
             const description = document.createElement('p');
             description.className = 'api-item-desc';
-            description.textContent = item.desc || 'No description available.';
-
-            const path = document.createElement('code');
-            path.className = 'api-item-path';
-            path.textContent = item.path;
-
+            description.textContent = item.desc || 'Gunakan layanan ini langsung dari dashboard.';
             const footer = document.createElement('div');
             footer.className = 'api-item-footer';
-
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'api-open-button';
-            button.textContent = 'Cek Sekarang';
-
-            button.addEventListener('click', () => {
-                openApiModal(item);
-            });
-
+            button.textContent = item.id === 'status' ? 'Cek Status Server' : 'Buka Layanan';
+            button.addEventListener('click', () => openApiModal(item));
             footer.appendChild(button);
-
-            card.append(top, description, path);
-
-            if (item.innerDesc) {
-                const note = document.createElement('small');
-                note.className = 'api-item-note';
-                note.textContent = item.innerDesc;
-                card.appendChild(note);
-            }
-
-            card.appendChild(footer);
+            card.append(top, status, description, footer);
             grid.appendChild(card);
         });
-
         section.append(heading, grid);
         container.appendChild(section);
     });
+
+    // Real server status is checked on page load; other integrations turn green only
+    // after a successful real request, never from a hard-coded "online" label.
+    checkServerHealth();
 }
 
+async function checkServerHealth() {
+    const status = document.querySelector('[data-health-for="status"]');
+    if (!status) return;
+    try {
+        const response = await fetch('/api/status', { cache: 'no-store' });
+        const data = await response.json();
+        setApiHealth('status', response.ok && data?.status === true);
+    } catch {
+        setApiHealth('status', false);
+    }
+}
+
+function setApiHealth(id, online) {
+    const el = document.querySelector(`[data-health-for="${CSS.escape(id)}"]`);
+    if (!el) return;
+    el.classList.toggle('is-online', !!online);
+    el.classList.toggle('is-offline', !online);
+    el.classList.remove('is-unknown');
+    const label = el.querySelector('span');
+    if (label) label.textContent = online ? 'API AKTIF' : 'API ERROR';
+}
 
 /* =========================================
    PROFILE DRAWER SYSTEM
@@ -391,168 +383,188 @@ function initApiModal() {
 
 function openApiModal(item) {
     activeApiItem = item;
-
     const title = document.getElementById('apiResponseModalLabel');
     const description = document.getElementById('apiResponseModalDesc');
     const endpoint = document.getElementById('apiEndpoint');
     const inputContainer = document.getElementById('apiQueryInputContainer');
     const responseContent = document.getElementById('apiResponseContent');
-
     if (!title || !endpoint || !inputContainer) return;
 
-    title.textContent = item.name || 'API Endpoint';
+    title.textContent = item.name || 'API Service';
     description.textContent = item.desc || '';
     endpoint.textContent = item.path || '';
-
     inputContainer.innerHTML = '';
+    if (responseContent) { responseContent.textContent = ''; responseContent.classList.add('d-none'); }
 
-    if (responseContent) {
-        responseContent.textContent = '';
-        responseContent.classList.add('d-none');
-    }
-
+    const isYoutube = item.id === 'youtube';
     const parsedUrl = new URL(item.path, window.location.origin);
     const parameters = [...parsedUrl.searchParams.keys()];
-
+    if (isYoutube) {
+        const modeGroup = document.createElement('div');
+        modeGroup.className = 'mb-3 api-input-group';
+        modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
+        inputContainer.appendChild(modeGroup);
+        const qualityGroup = document.createElement('div');
+        qualityGroup.className = 'mb-3 api-input-group';
+        qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Kualitas video</label><select id="yt-quality" class="form-select"><option>144p</option><option>240p</option><option>360p</option><option>480p</option><option>720p</option><option>1080p</option><option>1440p</option><option>2160p</option><option value="best">Kualitas tertinggi tersedia</option></select>';
+        inputContainer.appendChild(qualityGroup);
+        document.getElementById('yt-mode').addEventListener('change', event => {
+            qualityGroup.style.display = event.target.value === 'audio' ? 'none' : '';
+        });
+    }
+    parameters.forEach((parameter, index) => {
+        const group = document.createElement('div');
+        group.className = 'mb-3 api-input-group';
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.textContent = parameter;
+        label.htmlFor = `api-param-${index}`;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control api-param-input';
+        input.id = `api-param-${index}`;
+        input.dataset.parameter = parameter;
+        input.placeholder = parameter === 'url' ? 'Tempel link video / postingan di sini' : `Masukkan ${parameter}...`;
+        input.autocomplete = 'off';
+        group.append(label, input);
+        inputContainer.appendChild(group);
+    });
     if (parameters.length === 0) {
         const note = document.createElement('p');
         note.className = 'small text-secondary';
-        note.textContent = 'This endpoint does not require query parameters.';
+        note.textContent = 'Status server akan diperiksa secara langsung.';
         inputContainer.appendChild(note);
-    } else {
-        parameters.forEach((parameter, index) => {
-            const group = document.createElement('div');
-            group.className = 'mb-3 api-input-group';
-
-            const label = document.createElement('label');
-            label.className = 'form-label';
-            label.textContent = parameter;
-            label.htmlFor = `api-param-${index}`;
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'form-control api-param-input';
-            input.id = `api-param-${index}`;
-            input.dataset.parameter = parameter;
-            input.placeholder = `Enter ${parameter}...`;
-            input.autocomplete = 'off';
-
-            group.append(label, input);
-            inputContainer.appendChild(group);
-        });
     }
-
-    if (apiModalInstance) {
-        apiModalInstance.show();
-    }
+    if (apiModalInstance) apiModalInstance.show();
 }
-
 
 /* =========================================
    EXECUTE API REQUEST
 ========================================= */
 
+function collectDownloadLinks(value, label = 'Download', output = [], seen = new Set()) {
+    if (!value) return output;
+    if (typeof value === 'string') {
+        if (/^https?:\\/\\//i.test(value) && /\\.(mp3|mp4|m4a|webm|mkv|jpg|jpeg|png)(?:[?#]|$)/i.test(value)) {
+            if (!seen.has(value)) { seen.add(value); output.push({ label, url: value }); }
+        }
+        return output;
+    }
+    if (Array.isArray(value)) {
+        value.forEach((entry, index) => collectDownloadLinks(entry, entry?.quality || entry?.format || `Pilihan ${index + 1}`, output, seen));
+        return output;
+    }
+    if (typeof value === 'object') {
+        Object.entries(value).forEach(([key, child]) => {
+            const nextLabel = child && typeof child === 'object'
+                ? (child.quality || child.format || child.label || key)
+                : key;
+            collectDownloadLinks(child, String(nextLabel), output, seen);
+        });
+    }
+    return output;
+}
+
+function renderApiResult(container, data, mode, quality) {
+    container.innerHTML = '';
+    const links = collectDownloadLinks(data);
+    if (mode === 'video' && quality && quality !== 'best') {
+        const exact = links.filter(link => link.label.toLowerCase().includes(quality.toLowerCase()));
+        if (exact.length) links.splice(0, links.length, ...exact);
+    }
+    if (links.length) {
+        const heading = document.createElement('p');
+        heading.className = 'api-result-heading';
+        heading.textContent = 'Hasil siap diunduh';
+        container.appendChild(heading);
+        links.forEach((link, index) => {
+            const anchor = document.createElement('a');
+            anchor.className = 'api-download-button';
+            anchor.href = link.url;
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            anchor.textContent = `⬇ ${link.label || `Unduh file ${index + 1}`}`;
+            container.appendChild(anchor);
+        });
+    }
+    const details = document.createElement('details');
+    details.className = 'api-raw-result';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Lihat detail respons API';
+    const pre = document.createElement('pre');
+    pre.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    details.append(summary, pre);
+    container.appendChild(details);
+    if (!links.length) {
+        const note = document.createElement('p');
+        note.className = 'small text-warning mt-2';
+        note.textContent = 'Respons diterima, tetapi API tidak mengembalikan tautan unduhan yang dikenali.';
+        container.prepend(note);
+    }
+}
+
 async function executeApiRequest() {
     if (!activeApiItem) return;
-
     const executeButton = document.getElementById('submitQueryBtn');
     const loading = document.getElementById('apiResponseLoading');
     const responseContent = document.getElementById('apiResponseContent');
-
     if (!executeButton || !responseContent) return;
 
+    const item = activeApiItem;
     const originalButtonText = executeButton.textContent;
-
     executeButton.disabled = true;
-    executeButton.textContent = 'Processing...';
-
+    executeButton.textContent = 'Memproses...';
     if (loading) loading.classList.remove('d-none');
-
     responseContent.classList.add('d-none');
-    responseContent.textContent = '';
+    responseContent.innerHTML = '';
 
     try {
-        const url = new URL(activeApiItem.path, window.location.origin);
-
-        document.querySelectorAll(
-            '#apiQueryInputContainer .api-param-input'
-        ).forEach(input => {
-            url.searchParams.set(
-                input.dataset.parameter,
-                input.value.trim()
-            );
+        let url = new URL(item.path, window.location.origin);
+        document.querySelectorAll('#apiQueryInputContainer .api-param-input').forEach(input => {
+            url.searchParams.set(input.dataset.parameter, input.value.trim());
         });
+        [...url.searchParams.entries()].forEach(([key, value]) => { if (!value) url.searchParams.delete(key); });
 
-        // Avoid sending empty parameters
-        [...url.searchParams.entries()].forEach(([key, value]) => {
-            if (value === '') {
-                url.searchParams.delete(key);
-            }
-        });
-
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
-
-        let response;
-
-        try {
-            response = await fetch(url.href, {
-                method: 'GET',
-                headers: {
-                    Accept: 'application/json, text/plain, */*'
-                },
-                signal: controller.signal
-            });
-        } finally {
-            clearTimeout(timeout);
+        let mode = '';
+        let quality = '';
+        if (item.id === 'youtube') {
+            mode = document.getElementById('yt-mode')?.value || 'video';
+            quality = document.getElementById('yt-quality')?.value || 'best';
+            const videoUrl = url.searchParams.get('url');
+            if (!videoUrl) throw new Error('Link YouTube wajib diisi.');
+            url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
+            url.searchParams.set('url', videoUrl);
         }
 
+        for (const input of document.querySelectorAll('#apiQueryInputContainer .api-param-input')) {
+            if (!input.value.trim()) throw new Error(`Kolom ${input.dataset.parameter} wajib diisi.`);
+        }
+
+        const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(60000) });
         const contentType = response.headers.get('content-type') || '';
+        const raw = await response.text();
+        let data;
+        try { data = contentType.includes('json') || /^[\\s]*[\\[{]/.test(raw) ? JSON.parse(raw) : raw; }
+        catch { data = raw; }
 
         responseContent.classList.remove('d-none');
-
-        if (contentType.includes('image/')) {
-            const image = document.createElement('img');
-            image.src = url.href;
-            image.alt = 'API response';
-            image.style.maxWidth = '100%';
-            image.style.height = 'auto';
-            responseContent.textContent = '';
-            responseContent.appendChild(image);
-        } else {
-            const resultText = await response.text();
-
-            try {
-                const json = JSON.parse(resultText);
-                responseContent.textContent = JSON.stringify(json, null, 2);
-            } catch {
-                responseContent.textContent = resultText || '(Empty response)';
-            }
-        }
-
-        if (!response.ok) {
-            responseContent.textContent =
-                `HTTP ${response.status} ${response.statusText}\n\n` +
-                responseContent.textContent;
-        }
-
+        if (!response.ok || data?.status === false) throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
+        renderApiResult(responseContent, data, mode, quality);
+        setApiHealth(item.id || item.name, true);
     } catch (error) {
         responseContent.classList.remove('d-none');
-
-        responseContent.textContent = error.name === 'AbortError'
-            ? 'Request timeout: API tidak merespons selama 30 detik.'
-            : `Request failed: ${error.message}`;
-
+        const message = document.createElement('p');
+        message.className = 'api-error-message';
+        message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : error.message;
+        responseContent.appendChild(message);
+        setApiHealth(item.id || item.name, false);
         console.error('[FadXD API] Request error:', error);
-
     } finally {
         if (loading) loading.classList.add('d-none');
-
         executeButton.disabled = false;
         executeButton.textContent = originalButtonText;
     }
 }
-
 
 /* =========================================
    RESET MODAL
