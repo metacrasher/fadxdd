@@ -523,7 +523,7 @@ function renderApiResult(container, data, mode, quality) {
 
     const links = collectDownloadLinks(data);
     const qualityRank = value => {
-        const match = String(value).match(/(\\d{3,4})\\s*p/i);
+        const match = String(value).match(/(\d{3,4})\s*p/i);
         return match ? Number(match[1]) : 0;
     };
     if (mode === 'video' && quality && quality !== 'best') {
@@ -624,7 +624,7 @@ async function executeApiRequest() {
         const contentType = response.headers.get('content-type') || '';
         const raw = await response.text();
         let data;
-        try { data = contentType.includes('json') || /^[\\s]*[\\[{]/.test(raw) ? JSON.parse(raw) : raw; }
+        try { data = contentType.includes('json') || /^[\s]*[\[{]/.test(raw) ? JSON.parse(raw) : raw; }
         catch { data = raw; }
 
         responseContent.classList.remove('d-none');
