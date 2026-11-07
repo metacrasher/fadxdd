@@ -175,3 +175,34 @@ body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;back
  .ring-one{width:235px;height:235px}.ring-two{width:205px;height:265px}
  .hero-copy{margin:0;width:100%;max-width:none}
 }
+
+
+/* Live API status and direct download actions */
+.api-health{display:inline-flex;align-items:center;gap:8px;margin:8px 0 14px;padding:6px 10px;border:1px solid rgba(148,163,184,.18);border-radius:999px;background:rgba(148,163,184,.06);color:#91a6b6;font:700 9px Inter,sans-serif;letter-spacing:.8px}
+.api-health i{width:7px;height:7px;border-radius:50%;background:#8795a4;box-shadow:0 0 8px currentColor}
+.api-health.is-online{color:#45e58b;border-color:rgba(69,229,139,.35);background:rgba(69,229,139,.08)}
+.api-health.is-online i{background:#35e982;box-shadow:0 0 12px rgba(53,233,130,.9)}
+.api-health.is-offline{color:#ff7272;border-color:rgba(255,114,114,.3);background:rgba(255,114,114,.07)}
+.api-health.is-offline i{background:#ff6262}
+.api-item-top{display:flex;align-items:center;gap:12px}
+.api-item-top .api-item-name{flex:1}
+.api-item-desc{min-height:42px}
+.api-download-button{display:flex;align-items:center;justify-content:center;width:100%;margin:8px 0;padding:12px 16px;border:1px solid rgba(53,233,130,.45);border-radius:7px;background:rgba(53,233,130,.1);color:#6df3a7;font-weight:800;text-decoration:none;transition:.2s}
+.api-download-button:hover{background:rgba(53,233,130,.2);color:#baffd3;transform:translateY(-1px)}
+.api-result-heading{color:#6df3a7;font-weight:800;margin:0 0 10px}
+.api-raw-result{margin-top:16px;color:#9db3c2;font-size:12px}
+.api-raw-result summary{cursor:pointer}
+.api-raw-result pre{max-height:260px;overflow:auto;margin-top:10px;padding:12px;border-radius:7px;background:#02070d;color:#c6d7e4;white-space:pre-wrap;overflow-wrap:anywhere}
+.api-error-message{padding:12px;border:1px solid rgba(255,100,100,.35);border-radius:7px;background:rgba(255,80,80,.08);color:#ff9a9a}
+#apiQueryInputContainer .form-select{background-color:#071522;color:#e5f7ff;border:1px solid rgba(0,234,255,.3)}
+#apiResponseContent{white-space:normal}
+
+
+/* YouTube metadata preview and obvious one-tap download action */
+.yt-video-preview{display:grid;grid-template-columns:minmax(110px,38%) 1fr;gap:14px;align-items:center;margin:14px 0 18px;padding:12px;border:1px solid rgba(0,234,255,.24);border-radius:9px;background:linear-gradient(135deg,rgba(0,234,255,.07),rgba(4,13,23,.92))}
+.yt-video-thumbnail{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#02070d}
+.yt-video-info{min-width:0}
+.yt-video-info h4{margin:0;color:#effcff;font-size:13px;font-weight:800;line-height:1.5;overflow-wrap:anywhere}
+.yt-video-info p{margin:7px 0 0;color:#8ca5b5;font-size:10px}
+.api-download-button{min-height:46px;gap:8px;font-size:12px;letter-spacing:.2px}
+@media(max-width:480px){.yt-video-preview{grid-template-columns:1fr}.yt-video-thumbnail{max-height:210px}}
