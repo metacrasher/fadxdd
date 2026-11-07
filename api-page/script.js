@@ -453,7 +453,7 @@ function isValidYouTubeUrl(value) {
     if (!isValidHttpUrl(value)) return false;
     try {
         const parsed = new URL(value);
-        const host = parsed.hostname.toLowerCase().replace(/^www\\./, '');
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
         const validHost = host === 'youtu.be' || host === 'youtube.com' ||
             host === 'm.youtube.com' || host === 'youtube-nocookie.com' ||
             host.endsWith('.youtube.com');
@@ -461,7 +461,7 @@ function isValidYouTubeUrl(value) {
         const videoId = host === 'youtu.be'
             ? parsed.pathname.split('/').filter(Boolean)[0]
             : parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop();
-        return /^[\\w-]{11}$/.test(videoId || '');
+        return /^[\w-]{11}$/.test(videoId || '');
     } catch {
         return false;
     }
