@@ -67,8 +67,10 @@ app.use((req, res, next) => {
     next();
 });
 
+
 // API Routes
 let totalRoutes = 0;
+let failedRoutes = [];
 
 const apiFolder = path.join(__dirname, 'src', 'api');
 
@@ -79,43 +81,46 @@ if (!fs.existsSync(apiFolder)) {
 fs.readdirSync(apiFolder).forEach((subfolder) => {
     const subfolderPath = path.join(apiFolder, subfolder);
 
-    if (!fs.statSync(subfolderPath).isDirectory()) {
-        return;
-    }
+    if (!fs.statSync(subfolderPath).isDirectory()) return;
 
     fs.readdirSync(subfolderPath).forEach((file) => {
         const filePath = path.join(subfolderPath, file);
 
-        if (path.extname(file) === '.js') {
+        if (path.extname(file) !== '.js') return;
+
+        try {
+            console.log(`[ROUTE CHECK] Loading: ${subfolder}/${file}`);
+
             const route = require(filePath);
 
             if (typeof route !== 'function') {
-                throw new Error(
-                    `Route ${file} harus mengekspor function!`
-                );
+                throw new Error('Route harus mengekspor function!');
             }
 
             route(app);
             totalRoutes++;
 
-            console.log(
-                chalk.bgHex('#FFFF99').hex('#333').bold(
-                    ` Loaded Route: ${path.basename(file)} `
-                )
+            console.log(`[ROUTE OK] ${subfolder}/${file}`);
+        } catch (error) {
+            failedRoutes.push({
+                file: `${subfolder}/${file}`,
+                error: error.message
+            });
+
+            console.error(
+                `[ROUTE LOAD ERROR] ${subfolder}/${file}`,
+                error.stack || error
             );
         }
     });
 });
 
-console.log(
-    chalk.bgHex('#90EE90').hex('#333').bold(' Load Complete! ✓ ')
-);
+console.log(`[ROUTE SUMMARY] Berhasil: ${totalRoutes}`);
+console.log(`[ROUTE SUMMARY] Gagal: ${failedRoutes.length}`);
 
-console.log(
-    chalk.bgHex('#90EE90').hex('#333').bold(
-        ` Total Routes Loaded: ${totalRoutes} `
-    )
-);
+if (failedRoutes.length > 0) {
+    console.error('[FAILED ROUTES]', JSON.stringify(failedRoutes));
+}
 
 // Homepage
 app.get('/', (req, res) => {
