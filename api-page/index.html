@@ -3,224 +3,541 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
 <link rel="icon" href="/src/icon.png" type="image/png">
 <title id="page"></title>
 
-<!-- Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-
-<!-- Font -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
 <style>
+/* ==================================
+   PREMIUM DARK API DASHBOARD
+================================== */
 
-/* ============================= */
-/*      BRUTAL DARK EXTREME      */
-/* ============================= */
-
-:root{
- --bg:#050505;
- --card:#0f0f0f;
- --border:#1a1a1a;
- --text:#eaeaea;
- --accent:#00f0ff;
- --danger:#ff004c;
+:root {
+  --bg: #080d18;
+  --surface: #0e1626;
+  --surface2: #121d30;
+  --border: rgba(148,163,184,.13);
+  --primary: #38bdf8;
+  --primary-soft: rgba(56,189,248,.12);
+  --text: #e8eef8;
+  --muted: #8998ad;
+  --white: #ffffff;
 }
 
-body{
- background:#050505 !important;
- color:var(--text) !important;
- font-family:'Poppins',sans-serif;
- overflow-x:hidden;
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(37,99,235,.13), transparent 55%),
+    var(--bg) !important;
+  color: var(--text) !important;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* BACKGROUND EFFECT */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(148,163,184,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,.025) 1px, transparent 1px);
+  background-size: 45px 45px;
 }
 
 /* NAVBAR */
-.navbar{
- background:#0b0b0b !important;
- border-bottom:1px solid var(--border);
- padding:15px 0;
+
+.navbar {
+  background: rgba(8,13,24,.88) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: 17px 0;
 }
 
-.navbar-brand{
- color:var(--accent) !important;
- font-weight:700;
- font-size:20px;
+.navbar-brand {
+  color: var(--white) !important;
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -.5px;
 }
 
-/* TITLE */
-#name{
- color:var(--accent);
- font-weight:700;
+#header {
+  color: var(--primary);
 }
 
-#version, #versionHeader{
- background:var(--accent);
- color:#000;
- padding:4px 10px;
- border-radius:6px;
- font-size:12px;
- font-weight:600;
+#versionHeader,
+#version {
+  display: inline-flex;
+  align-items: center;
+  background: var(--primary-soft);
+  border: 1px solid rgba(56,189,248,.25);
+  color: var(--primary);
+  padding: 5px 11px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
 }
 
-/* BANNER */
-.banner{
- border-radius:12px;
- box-shadow:0 0 40px #000;
+/* MAIN CONTAINER */
+
+.container {
+  max-width: 1120px;
+}
+
+/* HERO SECTION */
+
+#dynamicImage {
+  display: block;
+  width: 100%;
+  max-height: 310px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  box-shadow: 0 15px 50px rgba(0,0,0,.25);
+}
+
+#dynamicImage[src=""] {
+  display: none;
+}
+
+#name {
+  color: var(--white);
+  font-size: clamp(27px, 5vw, 40px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  margin: 0;
+}
+
+#description {
+  color: var(--muted) !important;
+  font-size: 14px;
+  line-height: 1.9;
+  max-width: 700px;
 }
 
 /* SEARCH */
-#searchInput{
- background:#0e0e0e !important;
- border:1px solid var(--border) !important;
- color:#fff !important;
+
+#searchInput {
+  height: 54px;
+  padding: 0 20px;
+  background: rgba(18,29,48,.85) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px;
+  color: var(--white) !important;
+  font-size: 14px;
+  transition: .25s ease;
 }
 
-#searchInput:focus{
- border-color:var(--accent) !important;
- box-shadow:0 0 10px #00f0ff55 !important;
+#searchInput::placeholder {
+  color: #68788e;
 }
 
-/* CARDS */
-.card{
- background:var(--card) !important;
- border:1px solid var(--border) !important;
- transition:.2s;
+#searchInput:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(56,189,248,.09) !important;
 }
 
-.card:hover{
- border-color:var(--accent) !important;
- transform:translateY(-4px);
- box-shadow:0 0 20px #00f0ff33;
+/* API SECTION */
+
+#apiContent {
+  padding-bottom: 30px;
 }
 
-/* BUTTON */
-.btn-dark{
- background:var(--accent) !important;
- border:none !important;
- color:#000 !important;
- font-weight:600;
+/* CATEGORY HEADINGS */
+
+#apiContent h1,
+#apiContent h2,
+#apiContent h3,
+#apiContent h4,
+#apiContent h5 {
+  color: var(--white);
+  font-weight: 700;
 }
 
-.btn-dark:hover{
- transform:translateY(-2px);
- box-shadow:0 0 10px #00f0ff88;
+/* API CARDS */
+
+#apiContent .card,
+#apiContent .api-item {
+  background: linear-gradient(
+    145deg,
+    rgba(18,29,48,.95),
+    rgba(13,22,37,.95)
+  ) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 15px !important;
+  color: var(--text) !important;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  overflow: hidden;
+}
+
+#apiContent .card:hover,
+#apiContent .api-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(56,189,248,.45) !important;
+  box-shadow: 0 12px 35px rgba(0,0,0,.22);
+}
+
+#apiContent .card-body {
+  padding: 20px;
+}
+
+#apiContent .card-title,
+#apiContent h6 {
+  color: var(--white) !important;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#apiContent .card-text,
+#apiContent p {
+  color: var(--muted) !important;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* BUTTONS */
+
+.btn-dark {
+  background: linear-gradient(135deg,#38bdf8,#0ea5e9) !important;
+  border: none !important;
+  color: #06111e !important;
+  border-radius: 9px !important;
+  padding: 9px 17px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: .25s ease;
+}
+
+.btn-dark:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px rgba(56,189,248,.2);
+  color: #06111e !important;
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 3px rgba(56,189,248,.2) !important;
 }
 
 /* MODAL */
-.modal-content{
- background:#0b0b0b !important;
- border:1px solid var(--border);
- color:#fff;
+
+.modal-backdrop {
+  backdrop-filter: blur(5px);
 }
 
-.modal-header,.modal-footer{
- border-color:var(--border) !important;
+.modal-content {
+  background: #0e1727 !important;
+  border: 1px solid rgba(148,163,184,.18) !important;
+  border-radius: 17px !important;
+  color: var(--text) !important;
+  box-shadow: 0 25px 80px rgba(0,0,0,.5);
 }
 
-/* CODE BLOCK */
-pre{
- background:#0f0f0f !important;
- color:var(--accent);
- border:1px solid var(--border);
- padding:10px;
- border-radius:8px;
+.modal-header,
+.modal-footer {
+  border-color: var(--border) !important;
+  padding: 19px 22px;
 }
 
-/* LOADING */
-#loadingScreen{
- background:#000;
- position:fixed;
- width:100%;
- height:100%;
- display:flex;
- justify-content:center;
- align-items:center;
- z-index:9999;
+.modal-header h5 {
+  color: var(--white);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.modal-body {
+  padding: 22px;
+}
+
+.modal-body p {
+  color: var(--muted);
+}
+
+.btn-close {
+  filter: invert(1);
+}
+
+/* INPUT MODAL */
+
+.modal-body input,
+.modal-body .form-control {
+  background: #121e31 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px;
+  color: white !important;
+  padding: 11px 13px;
+}
+
+.modal-body input:focus,
+.modal-body .form-control:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(56,189,248,.08) !important;
+}
+
+/* RESPONSE CODE */
+
+pre {
+  background: #080f1c !important;
+  color: #7dd3fc !important;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 16px;
+  font-family: Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  word-break: break-word;
+}
+
+#apiEndpoint {
+  color: #a5b4fc !important;
+}
+
+/* LOADING SCREEN */
+
+#loadingScreen {
+  background: #080d18;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: var(--white);
+}
+
+#loadingScreen p {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.spinner-border {
+  color: var(--primary) !important;
+}
+
+/* FOOTER */
+
+#wm {
+  color: #68788e;
+  font-size: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
 }
 
 /* SCROLLBAR */
-::-webkit-scrollbar{
- width:8px;
-}
-::-webkit-scrollbar-thumb{
- background:var(--accent);
-}
-::-webkit-scrollbar-track{
- background:#0a0a0a;
+
+::-webkit-scrollbar {
+  width: 7px;
 }
 
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #263a55;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 19px;
+    padding-right: 19px;
+  }
+
+  .navbar {
+    padding: 13px 0;
+  }
+
+  #name {
+    font-size: 28px;
+    letter-spacing: -1px;
+  }
+
+  #description {
+    font-size: 13px;
+  }
+
+  #dynamicImage {
+    max-height: 190px;
+    border-radius: 13px;
+  }
+
+  #apiContent .card-body {
+    padding: 16px;
+  }
+
+  .modal-dialog {
+    margin: 12px;
+  }
+}
+
+/* ANIMATION */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#name,
+#description,
+#searchInput {
+  animation: fadeUp .6s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 </style>
 </head>
 
 <body>
 
+<!-- LOADING -->
 <div id="loadingScreen">
- <div class="text-center">
-  <div class="spinner-border text-info mb-3"></div>
-  <p>Loading API...</p>
- </div>
+  <div class="text-center">
+    <div class="spinner-border mb-3" role="status"></div>
+    <p>INITIALIZING API SYSTEM...</p>
+  </div>
 </div>
 
+<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg">
- <div class="container">
-  <a class="navbar-brand d-flex align-items-center">
-   <span id="header" class="me-2"></span>
-   <div id="versionHeader"></div>
-  </a>
- </div>
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center">
+      <span id="header" class="me-2"></span>
+      <div id="versionHeader"></div>
+    </a>
+  </div>
 </nav>
 
-<div class="container mt-4">
+<!-- MAIN -->
+<div class="container mt-5">
 
- <img id="dynamicImage" class="banner mb-4 w-100" src="">
+  <!-- BANNER -->
+  <img
+    id="dynamicImage"
+    class="mb-4"
+    src=""
+    alt="API Banner"
+  >
 
- <div class="d-flex align-items-center mb-2">
-  <h1 id="name" class="me-2"></h1>
-  <div id="version"></div>
- </div>
-
- <p id="description" class="lead mb-4"></p>
-
- <input type="text" id="searchInput" class="form-control mb-5" placeholder="Search API...">
-
- <div id="apiContent"></div>
-
-</div>
-
-<!-- MODAL -->
-<div class="modal fade" id="apiResponseModal" tabindex="-1">
- <div class="modal-dialog modal-dialog-centered">
-  <div class="modal-content">
-
-   <div class="modal-header">
-    <div>
-     <h5 id="apiResponseModalLabel"></h5>
-     <p class="text-muted mb-0" id="apiResponseModalDesc" style="font-size:13px;"></p>
-    </div>
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-   </div>
-
-   <div class="modal-body">
-    <pre id="apiEndpoint"></pre>
-    <div id="apiQueryInputContainer"></div>
-
-    <div id="apiResponseLoading" class="d-none text-center my-3">
-     <div class="spinner-border text-info"></div>
-    </div>
-
-    <pre id="apiResponseContent" class="d-none mt-3"></pre>
-   </div>
-
-   <div class="modal-footer">
-    <button id="submitQueryBtn" class="btn btn-dark">Execute</button>
-   </div>
-
+  <!-- TITLE -->
+  <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+    <h1 id="name"></h1>
+    <div id="version"></div>
   </div>
- </div>
+
+  <!-- DESCRIPTION -->
+  <p id="description" class="mb-4"></p>
+
+  <!-- SEARCH -->
+  <input
+    type="text"
+    id="searchInput"
+    class="form-control mb-5"
+    placeholder="Search API endpoints..."
+    autocomplete="off"
+  >
+
+  <!-- API CONTENT -->
+  <div id="apiContent"></div>
+
 </div>
 
+<!-- API MODAL -->
+<div class="modal fade" id="apiResponseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <div>
+          <h5 id="apiResponseModalLabel"></h5>
+          <p
+            class="mb-0"
+            id="apiResponseModalDesc"
+            style="font-size:12px;"
+          ></p>
+        </div>
+
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+
+        <pre id="apiEndpoint"></pre>
+
+        <div id="apiQueryInputContainer"></div>
+
+        <div
+          id="apiResponseLoading"
+          class="d-none text-center my-4"
+        >
+          <div class="spinner-border"></div>
+          <p class="mt-2 small">Processing request...</p>
+        </div>
+
+        <pre
+          id="apiResponseContent"
+          class="d-none mt-3"
+        ></pre>
+
+      </div>
+
+      <div class="modal-footer">
+        <button id="submitQueryBtn" class="btn btn-dark">
+          Execute Request
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
 <div id="wm" class="text-center mt-5 mb-3"></div>
 
+<!-- SCRIPTS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/script.js"></script>
