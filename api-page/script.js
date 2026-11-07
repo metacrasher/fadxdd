@@ -468,17 +468,94 @@ function collectDownloadLinks(value, label = 'Download', output = [], seen = new
     return output;
 }
 
+function findMediaMetadata(data) {
+    const root = data?.result || data;
+    const metadata = root?.metadata || root?.details || root?.video || root;
+    const findValue = (object, keys) => {
+        if (!object || typeof object !== 'object') return '';
+        for (const [key, value] of Object.entries(object)) {
+            if (keys.test(key) && typeof value === 'string' && value.trim()) return value;
+        }
+        for (const value of Object.values(object)) {
+            if (value && typeof value === 'object') {
+                const found = findValue(value, keys);
+                if (found) return found;
+            }
+        }
+        return '';
+    };
+    return {
+        title: metadata?.title || findValue(metadata, /^(title|name)$/i) || 'Video YouTube',
+        thumbnail: findValue(metadata, /(thumbnail|thumb|image|cover)/i),
+        duration: metadata?.duration || metadata?.timestamp || findValue(metadata, /(duration|timestamp|length)/i),
+        author: metadata?.author?.name || metadata?.author || metadata?.channel || ''
+    };
+}
+
 function renderApiResult(container, data, mode, quality) {
     container.innerHTML = '';
-    const links = collectDownloadLinks(data);
-    if (mode === 'video' && quality && quality !== 'best') {
-        const exact = links.filter(link => link.label.toLowerCase().includes(quality.toLowerCase()));
-        if (exact.length) links.splice(0, links.length, ...exact);
+    if (mode === 'video' || mode === 'audio') {
+        const info = findMediaMetadata(data);
+        if (info.thumbnail && /^https?:\\/\\//i.test(info.thumbnail)) {
+            const preview = document.createElement('section');
+            preview.className = 'yt-video-preview';
+            const image = document.createElement('img');
+            image.className = 'yt-video-thumbnail';
+            image.src = info.thumbnail;
+            image.alt = 'Thumbnail video YouTube';
+            image.loading = 'lazy';
+            image.referrerPolicy = 'no-referrer';
+            const text = document.createElement('div');
+            text.className = 'yt-video-info';
+            const title = document.createElement('h4');
+            title.textContent = info.title;
+            text.appendChild(title);
+            const meta = [info.author, info.duration].filter(Boolean).join(' • ');
+            if (meta) {
+                const detail = document.createElement('p');
+                detail.textContent = meta;
+                text.appendChild(detail);
+            }
+            preview.append(image, text);
+            container.appendChild(preview);
+        }
     }
+
+    const links = collectDownloadLinks(data);
+    const qualityRank = value => {
+        const match = String(value).match(/(\\d{3,4})\\s*p/i);
+        return match ? Number(match[1]) : 0;
+    };
+    if (mode === 'video' && quality && quality !== 'best') {
+        const requested = Number.parseInt(quality, 10);
+        const exact = links.filter(link => qualityRank(link.label) === requested);
+        if (exact.length) {
+            links.splice(0, links.length, ...exact);
+        } else {
+            const available = links.filter(link => qualityRank(link.label) > 0);
+            if (available.length) {
+                const lowerOrEqual = available.filter(link => qualityRank(link.label) <= requested);
+                const chosen = lowerOrEqual.sort((a, b) => qualityRank(b.label) - qualityRank(a.label))[0]
+                    || available.sort((a, b) => qualityRank(a.label) - qualityRank(b.label))[0];
+                links.splice(0, links.length, chosen);
+                const note = document.createElement('p');
+                note.className = 'small text-warning mt-2';
+                note.textContent = exact.length ? '' : 'Kualitas persis tidak tersedia; ditampilkan kualitas terdekat yang tersedia.';
+                container.appendChild(note);
+            }
+        }
+    } else if (mode === 'video' && quality === 'best') {
+        const available = links.filter(link => qualityRank(link.label) > 0);
+        if (available.length) {
+            const best = available.sort((a, b) => qualityRank(b.label) - qualityRank(a.label))[0];
+            links.splice(0, links.length, best);
+        }
+    }
+
     if (links.length) {
         const heading = document.createElement('p');
         heading.className = 'api-result-heading';
-        heading.textContent = 'Hasil siap diunduh';
+        heading.textContent = mode === 'audio' ? 'Musik siap diunduh' : 'Pilih file untuk diunduh';
         container.appendChild(heading);
         links.forEach((link, index) => {
             const anchor = document.createElement('a');
@@ -486,7 +563,8 @@ function renderApiResult(container, data, mode, quality) {
             anchor.href = link.url;
             anchor.target = '_blank';
             anchor.rel = 'noopener noreferrer';
-            anchor.textContent = `⬇ ${link.label || `Unduh file ${index + 1}`}`;
+            anchor.download = '';
+            anchor.textContent = mode === 'audio' ? '⬇ Unduh Musik MP3' : `⬇ Unduh Video ${link.label || (index + 1)}`;
             container.appendChild(anchor);
         });
     }
@@ -505,7 +583,6 @@ function renderApiResult(container, data, mode, quality) {
         container.prepend(note);
     }
 }
-
 async function executeApiRequest() {
     if (!activeApiItem) return;
     const executeButton = document.getElementById('submitQueryBtn');
