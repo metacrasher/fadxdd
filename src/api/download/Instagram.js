@@ -71,7 +71,20 @@ async function igdl(url) {
         if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
             throw new Error('Provider Instagram melewati batas waktu. Silakan coba lagi.');
         }
-        throw new Error('Provider Instagram tidak dapat dihubungi sementara.');
+        if (error.response) {
+            throw new Error(`Provider Instagram mengalami HTTP ${error.response.status} saat menghubungi server.`);
+        }
+        const networkErrors = {
+            ENOTFOUND: 'DNS provider tidak ditemukan dari server API.',
+            EAI_AGAIN: 'DNS provider sedang gagal sementara dari server API.',
+            ECONNREFUSED: 'Koneksi ke server provider ditolak.',
+            ECONNRESET: 'Koneksi ke server provider terputus.',
+            EHOSTUNREACH: 'Server API tidak dapat menjangkau host provider.',
+            CERT_HAS_EXPIRED: 'Sertifikat HTTPS provider sudah kedaluwarsa.',
+            ERR_TLS_CERT_ALTNAME_INVALID: 'Nama host tidak cocok dengan sertifikat HTTPS provider.'
+        };
+        const reason = networkErrors[error.code] || error.code || 'NETWORK_ERROR';
+        throw new Error(`Provider Instagram tidak dapat dihubungi: ${reason}`);
     }
 
     if (response.status === 429) {
