@@ -392,7 +392,8 @@ function openApiModal(item) {
 
     title.textContent = item.name || 'API Service';
     description.textContent = item.desc || '';
-    endpoint.textContent = item.path || '';
+    endpoint.textContent = '';
+    endpoint.classList.add('d-none');
     inputContainer.innerHTML = '';
     if (responseContent) { responseContent.textContent = ''; responseContent.classList.add('d-none'); }
 
@@ -541,9 +542,8 @@ function renderApiResult(container, data, mode, quality) {
         options.forEach(option => {
             const anchor = document.createElement('a');
             anchor.className = 'api-download-button';
-            anchor.href = option.url;
-            anchor.target = '_blank';
-            anchor.rel = 'noopener noreferrer';
+            anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent((result.title || 'tiktok-video').slice(0, 80));
+            anchor.setAttribute('download', '');
             anchor.textContent = '⬇ Unduh ' + option.quality;
             container.appendChild(anchor);
         });
