@@ -510,7 +510,7 @@ function openApiModal(item) {
             try {
                 parsed = new URL(value);
                 if (!['http:', 'https:'].includes(parsed.protocol) ||
-                    !/(^|\\.)((youtube\\.com)|(youtu\\.be))$/i.test(parsed.hostname)) {
+                    !/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsed.hostname)) {
                     throw new Error('URL bukan YouTube');
                 }
             } catch {
@@ -846,7 +846,7 @@ async function executeApiRequest() {
                     throw new Error('Masukkan URL video YouTube yang valid.');
                 }
                 if (!['http:', 'https:'].includes(parsedVideoUrl.protocol) ||
-                    !/(^|\\.)((youtube\\.com)|(youtu\\.be))$/i.test(parsedVideoUrl.hostname)) {
+                    !/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsedVideoUrl.hostname)) {
                     throw new Error('Masukkan link YouTube dari youtube.com atau youtu.be.');
                 }
                 const selectedQuality = document.getElementById('yt-quality')?.value || '360';
