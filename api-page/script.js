@@ -9,11 +9,14 @@ document.addEventListener('DOMContentLoaded', initApp);
 async function initApp() {
     const loadingScreen = document.getElementById('loadingScreen');
     const apiContent = document.getElementById('apiContent');
+    const settingsController = new AbortController();
+    const settingsTimeout = setTimeout(() => settingsController.abort(), 15000);
 
     try {
         // Load website configuration
         const response = await fetch('/src/settings.json', {
-            cache: 'no-store'
+            cache: 'no-store',
+            signal: settingsController.signal
         });
 
         if (!response.ok) {
@@ -42,6 +45,9 @@ async function initApp() {
         console.log('[FadXD API] Total kategori:', settings.categories.length);
 
     } catch (error) {
+        if (error?.name === 'AbortError') {
+            error = new Error('Waktu tunggu memuat konfigurasi habis. Periksa koneksi atau server, lalu muat ulang halaman.');
+        }
         console.error('[FadXD API] Initialization error:', error);
 
         if (apiContent) {
@@ -54,6 +60,7 @@ async function initApp() {
             `;
         }
     } finally {
+        clearTimeout(settingsTimeout);
         // Always remove loading screen, even if initialization fails
         if (loadingScreen) {
             loadingScreen.classList.add('loaded');
