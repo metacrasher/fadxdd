@@ -626,6 +626,9 @@ async function executeApiRequest() {
     responseContent.classList.add('d-none');
     responseContent.innerHTML = '';
 
+    let responseStatus = null;
+    let serverFailure = false;
+
     try {
         let url = new URL(item.path, window.location.origin);
         document.querySelectorAll('#apiQueryInputContainer .api-param-input').forEach(input => {
@@ -649,6 +652,8 @@ async function executeApiRequest() {
         }
 
         const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(60000) });
+        responseStatus = response.status;
+        serverFailure = response.status >= 500 || response.status === 429;
         const contentType = response.headers.get('content-type') || '';
         const raw = await response.text();
         let data;
@@ -656,7 +661,13 @@ async function executeApiRequest() {
         catch { data = raw; }
 
         responseContent.classList.remove('d-none');
-        if (!response.ok || data?.status === false) throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
+        if (!response.ok || data?.status === false) {
+            // Client/input errors (4xx, except throttling) must not mark a healthy API red.
+            // A 5xx/429 or an explicit provider/server failure is a technical failure.
+            serverFailure = serverFailure || response.status >= 500 || response.status === 429 ||
+                (response.status >= 200 && response.status < 300 && data?.status === false);
+            throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
+        }
         renderApiResult(responseContent, data, mode, quality);
         setApiHealth(item.id || item.name, true);
     } catch (error) {
@@ -665,7 +676,15 @@ async function executeApiRequest() {
         message.className = 'api-error-message';
         message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : error.message;
         responseContent.appendChild(message);
-        setApiHealth(item.id || item.name, false);
+        // Missing/invalid user input and ordinary HTTP 4xx responses are not API outages.
+        // Only server-side failures, throttling, timeouts, or network failures turn the indicator red.
+        const isNetworkFailure = error instanceof TypeError || error.name === 'TimeoutError' ||
+            error.name === 'NetworkError' || error.name === 'AbortError';
+        if (serverFailure || isNetworkFailure) {
+            setApiHealth(item.id || item.name, false);
+        } else if (responseStatus === null) {
+            // Validation failed before the request reached the server: preserve the current color.
+        }
         console.error('[FadXD API] Request error:', error);
     } finally {
         if (loading) loading.classList.add('d-none');
