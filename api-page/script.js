@@ -405,13 +405,7 @@ function openApiModal(item) {
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
         inputContainer.appendChild(modeGroup);
-        const qualityGroup = document.createElement('div');
-        qualityGroup.className = 'mb-3 api-input-group';
-        qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Kualitas video</label><select id="yt-quality" class="form-select"><option>144p</option><option>240p</option><option>360p</option><option>480p</option><option>720p</option><option>1080p</option><option>1440p</option><option>2160p</option><option value="best">Kualitas tertinggi tersedia</option></select>';
-        if (isYoutube) inputContainer.appendChild(qualityGroup);
-        document.getElementById('yt-mode').addEventListener('change', event => {
-            qualityGroup.style.display = event.target.value === 'audio' ? 'none' : '';
-        });
+        document.getElementById('yt-mode').addEventListener('change', () => {});
     }
     parameters.forEach((parameter, index) => {
         const group = document.createElement('div');
@@ -644,9 +638,9 @@ async function executeApiRequest() {
         let quality = '';
         if (item.id === 'youtube' || item.id === 'tiktok') {
             mode = document.getElementById('yt-mode')?.value || 'video';
-            quality = document.getElementById('yt-quality')?.value || 'best';
+            quality = 'best';
             const videoUrl = url.searchParams.get('url');
-            if (!videoUrl) throw new Error('Link YouTube wajib diisi.');
+            if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : 'Masukan link TikTok yang valid.');
             if (item.id === 'youtube') url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
             url.searchParams.set('url', videoUrl);
         }
