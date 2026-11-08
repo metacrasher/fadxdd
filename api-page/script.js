@@ -516,7 +516,11 @@ function openApiModal(item) {
             } catch {
                 qualityGroup.style.display = 'none';
                 youtubePreviewGroup?.classList.add('d-none');
-                if (executeButton) executeButton.disabled = true;
+                // Keep Execute available for non-empty invalid input so the user
+                // receives the validation message instead of a silent disabled button.
+                if (executeButton) executeButton.disabled = !value;
+                const status = document.getElementById('yt-quality-status');
+                if (status) status.textContent = 'Masukkan link YouTube yang valid (youtube.com atau youtu.be).';
                 return;
             }
 
@@ -869,7 +873,7 @@ async function executeApiRequest() {
                 }
                 if (!['http:', 'https:'].includes(parsedVideoUrl.protocol) ||
                     !/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsedVideoUrl.hostname)) {
-                    throw new Error('Masukkan link YouTube dari youtube.com atau youtu.be.');
+                    throw new Error('Masukkan link YouTube yang valid (youtube.com atau youtu.be).');
                 }
                 const selectedQuality = document.getElementById('yt-quality')?.value || '360';
                 url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
