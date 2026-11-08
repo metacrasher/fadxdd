@@ -241,6 +241,15 @@ function renderCategories(categories) {
             const status = document.createElement('span');
             status.className = 'api-health is-unknown';
             status.innerHTML = `<i></i><span>${item.id === 'tiktok' ? 'Aktif' : 'Belum dicek'}</span>`;
+            if (item.id === 'tiktok') {
+                status.style.color = '#22c55e';
+                status.style.borderColor = 'rgba(34, 197, 94, 0.35)';
+                const indicator = status.querySelector('i');
+                if (indicator) {
+                    indicator.style.backgroundColor = '#22c55e';
+                    indicator.style.boxShadow = '0 0 8px rgba(34, 197, 94, 0.75)';
+                }
+            }
             status.dataset.healthFor = item.id || item.name;
 
             const description = document.createElement('p');
