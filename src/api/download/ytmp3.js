@@ -45,7 +45,7 @@ async function convertYoutube(url, format) {
 module.exports = function (app) {
     app.get('/download/ytmp3', async (req, res) => {
         try {
-            if (!getYoutubeId(String(req.query.url || '').trim()) || !/^[\\w-]{11}$/.test(getYoutubeId(String(req.query.url || '').trim()) || '')) return res.status(400).json({ status: false, message: 'Masukan link youtube yang valid.' });
+            if (!getYoutubeId(String(req.query.url || '').trim()) || !/^[\w-]{11}$/.test(getYoutubeId(String(req.query.url || '').trim()) || '')) return res.status(400).json({ status: false, message: 'Masukan link youtube yang valid.' });
             const result = await convertYoutube(req.query.url, 'mp3');
             return res.status(200).json({ status: true, result });
         } catch (error) {
