@@ -461,8 +461,12 @@ function openApiModal(item) {
         inputContainer.appendChild(group);
     });
 
+    let qualityGroup = null;
+    let metadataTimer;
+    let metadataRequestId = 0;
+
     if (isYoutube) {
-        const qualityGroup = document.createElement('div');
+        qualityGroup = document.createElement('div');
         qualityGroup.className = 'mb-3 api-input-group';
         qualityGroup.id = 'yt-quality-group';
         qualityGroup.style.display = 'none';
@@ -471,8 +475,6 @@ function openApiModal(item) {
 
         const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
         const modeSelect = document.getElementById('yt-mode');
-        let metadataTimer;
-        let metadataRequestId = 0;
         const loadYoutubeInfo = async () => {
             const value = urlInput?.value.trim() || '';
             const requestId = ++metadataRequestId;
@@ -532,7 +534,7 @@ function openApiModal(item) {
             if (isYoutube) {
                 metadataRequestId++;
                 clearTimeout(metadataTimer);
-                qualityGroup.style.display = 'none';
+                if (qualityGroup) qualityGroup.style.display = 'none';
                 const status = document.getElementById('yt-quality-status');
                 if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
             }
