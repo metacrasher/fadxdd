@@ -61,12 +61,12 @@ module.exports = function (app) {
             const extension = isAudio ? 'mp3' : 'mp4';
             const requestedName = String(req.query.name || 'tiktok-media')
                 .normalize('NFKC')
-                .replace(/[\\r\\n"]/g, '')
-                .replace(/[^\\p{L}\\p{N}._ -]/gu, '')
-                .replace(/\\s+/g, ' ')
+                .replace(/[\r\n"]/g, '')
+                .replace(/[^\p{L}\p{N}._ -]/gu, '')
+                .replace(/\s+/g, ' ')
                 .trim()
                 .slice(0, 80) || 'tiktok-media';
-            const asciiName = requestedName.replace(/[^a-z0-9._ -]/gi, '_').replace(/\\s+/g, '_') || 'tiktok-media';
+            const asciiName = requestedName.replace(/[^a-z0-9._ -]/gi, '_').replace(/\s+/g, '_') || 'tiktok-media';
             res.status(200);
             res.setHeader('Content-Type', isAudio ? 'audio/mpeg' : (contentType || 'video/mp4'));
             res.setHeader('Content-Disposition', 'attachment; filename="' + asciiName + '.' + extension + '"; filename*=UTF-8\'\'' + encodeURIComponent(requestedName + '.' + extension));
