@@ -509,15 +509,20 @@ function openApiModal(item) {
             let parsed;
             try {
                 parsed = new URL(value);
-                if (!/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsed.hostname)) throw new Error('URL bukan YouTube');
+                if (!['http:', 'https:'].includes(parsed.protocol) ||
+                    !/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsed.hostname)) {
+                    throw new Error('URL bukan YouTube');
+                }
             } catch {
                 qualityGroup.style.display = 'none';
                 youtubePreviewGroup?.classList.add('d-none');
                 if (executeButton) executeButton.disabled = true;
                 return;
             }
-            if (modeSelect.value !== 'video') return;
-            qualityGroup.style.display = '';
+
+            const isVideoMode = modeSelect.value === 'video';
+            qualityGroup.style.display = isVideoMode ? '' : 'none';
+            if (executeButton) executeButton.disabled = true;
             const status = document.getElementById('yt-quality-status');
             if (status) status.textContent = 'Memeriksa video YouTube...';
             try {
@@ -536,12 +541,16 @@ function openApiModal(item) {
                 const previewTitle = document.getElementById('yt-video-preview-title');
                 if (previewTitle) previewTitle.textContent = title;
                 const previewMeta = document.getElementById('yt-video-preview-meta');
-                if (previewMeta) previewMeta.textContent = 'Preview siap • Pilih resolusi, lalu tekan tombol proses untuk mengunduh.';
+                if (previewMeta) previewMeta.textContent = isVideoMode
+                    ? 'Preview MP4 siap • Pilih resolusi, lalu tekan tombol proses.'
+                    : 'Preview MP3 siap • Tekan tombol proses untuk mengunduh audio.';
                 youtubePreviewGroup?.classList.remove('d-none');
                 if (status) status.textContent = 'Preview video berhasil dimuat.';
                 if (executeButton) executeButton.disabled = false;
                 const quality = document.getElementById('yt-quality');
-                if (quality && data.result?.recommendedQuality) quality.value = String(data.result.recommendedQuality);
+                if (isVideoMode && quality && data.result?.recommendedQuality) {
+                    quality.value = String(data.result.recommendedQuality);
+                }
             } catch (error) {
                 if (requestId !== metadataRequestId) return;
                 youtubePreviewGroup?.classList.add('d-none');
@@ -551,6 +560,9 @@ function openApiModal(item) {
         };
         urlInput?.addEventListener('input', () => {
             clearTimeout(metadataTimer);
+            metadataRequestId++;
+            youtubePreviewGroup?.classList.add('d-none');
+            if (executeButton) executeButton.disabled = true;
             metadataTimer = setTimeout(loadYoutubeInfo, 650);
         });
         urlInput?.addEventListener('change', loadYoutubeInfo);
@@ -574,7 +586,7 @@ function openApiModal(item) {
                 clearTimeout(metadataTimer);
                 if (qualityGroup) qualityGroup.style.display = 'none';
                 youtubePreviewGroup?.classList.add('d-none');
-                if (executeButton) executeButton.disabled = modeSelect.value === 'video';
+                if (executeButton) executeButton.disabled = true;
                 const status = document.getElementById('yt-quality-status');
                 if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
             }
@@ -827,6 +839,16 @@ async function executeApiRequest() {
             const videoUrl = url.searchParams.get('url');
             if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : 'Masukan link TikTok yang valid.');
             if (item.id === 'youtube') {
+                let parsedVideoUrl;
+                try {
+                    parsedVideoUrl = new URL(videoUrl);
+                } catch {
+                    throw new Error('Masukkan URL video YouTube yang valid.');
+                }
+                if (!['http:', 'https:'].includes(parsedVideoUrl.protocol) ||
+                    !/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsedVideoUrl.hostname)) {
+                    throw new Error('Masukkan link YouTube dari youtube.com atau youtu.be.');
+                }
                 const selectedQuality = document.getElementById('yt-quality')?.value || '360';
                 url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
                 if (mode === 'video') url.searchParams.set('quality', selectedQuality);
