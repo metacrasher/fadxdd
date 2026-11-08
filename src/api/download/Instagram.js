@@ -149,7 +149,12 @@ async function igdl(url) {
         video.push({ quality: inferred || 'Kualitas tersedia', url: mediaUrl });
     }
 
-    const uniqueVideo = [...new Map(video.map(item => [item.url, item])).values()];
+    // If explicit resolution variants exist, discard generic entries collected
+    // from the provider's single videoUrl field.
+    const normalizedVideo = explicitQualities.length
+        ? video.filter(item => item.quality !== 'Terbaik')
+        : video;
+    const uniqueVideo = [...new Map(normalizedVideo.map(item => [item.url, item])).values()];
     video.length = 0;
     video.push(...uniqueVideo);
 
@@ -159,7 +164,7 @@ async function igdl(url) {
         media.download || media.url || payload.videoUrl || payload.video_url || payload.url
     ) || safeMediaUrl(typeof media.video === 'object' ? (media.video.url || media.video.downloadUrl) : null);
     if (!video.length && directVideo) video.push({ quality: 'Terbaik', url: directVideo });
-    else if (directVideo && !video.some(item => item.url === directVideo)) {
+    else if (!explicitQualities.length && directVideo && !video.some(item => item.url === directVideo)) {
         video.unshift({ quality: 'Terbaik', url: directVideo });
     }
 
