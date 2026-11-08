@@ -3,49 +3,71 @@ const axios = require('axios');
 function validTikTokUrl(value) {
     try {
         const u = new URL(value);
-        return /(^|\.)tiktok\.com$/i.test(u.hostname);
+        return /^([a-z0-9-]+\.)*tiktok\.com$/i.test(u.hostname);
     } catch { return false; }
 }
 
+// TikWM may return either an absolute CDN URL or a path relative to tikwm.com.
+function normalizeMediaUrl(value) {
+    if (typeof value !== 'string' || !value.trim()) return null;
+    try {
+        const parsed = new URL(value.trim(), 'https://www.tikwm.com');
+        return parsed.protocol === 'https:' ? parsed.href : null;
+    } catch { return null; }
+}
+
+function isAllowedMediaHost(hostname) {
+    const host = String(hostname || '').toLowerCase().replace(/\.$/, '');
+    return /(^|\.)(tiktokcdn(?:-[a-z0-9-]+)?\.com|tiktokv\.com|byteoversea\.com|ibytedtos\.com|muscdn\.com|tikwm\.com|tiktok\.com|akamaized\.net|tokcdn\.com)$/.test(host);
+}
+
 module.exports = function (app) {
-    // Proxy only media URLs returned by trusted TikTok/TikWM CDN hosts so the
-    // browser receives an attachment from this same origin (one-click download).
+    // Stream media through this origin so the browser downloads bytes, not a JSON API response.
     app.get('/download/tiktok/file', async (req, res) => {
-        const mediaUrl = String(req.query.url || '').trim();
-        let parsed;
-        try { parsed = new URL(mediaUrl); } catch {
-            return res.status(400).json({ status: false, message: 'Tautan file tidak valid.' });
-        }
-        const allowedHost = /(^|\.)(tiktokcdn\.com|tiktokv\.com|byteoversea\.com|ibytedtos\.com|tikwm\.com|muscdn\.com|tiktok\.com)$/i;
-        if (parsed.protocol !== 'https:' || !allowedHost.test(parsed.hostname)) {
+        const mediaUrl = normalizeMediaUrl(String(req.query.url || ''));
+        if (!mediaUrl) return res.status(400).json({ status: false, message: 'Tautan file tidak valid.' });
+
+        const parsed = new URL(mediaUrl);
+        if (!isAllowedMediaHost(parsed.hostname)) {
             return res.status(400).json({ status: false, message: 'Host file tidak diizinkan.' });
         }
+
         try {
-            const media = await axios.get(parsed.href, {
+            const media = await axios.get(mediaUrl, {
                 responseType: 'stream',
                 timeout: 60000,
                 maxRedirects: 5,
                 beforeRedirect: (options) => {
                     const redirectHost = String(options.hostname || '').toLowerCase();
                     const redirectProtocol = options.protocol || 'https:';
-                    if (redirectProtocol !== 'https:' || !allowedHost.test(redirectHost)) {
+                    if (redirectProtocol !== 'https:' || !isAllowedMediaHost(redirectHost)) {
                         throw new Error('CDN redirect host is not allowed.');
                     }
                 },
                 maxContentLength: 100 * 1024 * 1024,
                 headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://www.tiktok.com/' }
             });
-            const contentType = String(media.headers['content-type'] || 'application/octet-stream').split(';')[0];
-            const extension = contentType.includes('audio') ? 'mp3' : 'mp4';
+
+            const contentType = String(media.headers['content-type'] || '').split(';')[0].toLowerCase();
+            if (!contentType.startsWith('video/') && !contentType.startsWith('audio/') && contentType !== 'application/octet-stream') {
+                media.data.destroy();
+                return res.status(502).json({ status: false, message: 'Provider tidak mengirim file media yang valid.' });
+            }
+
+            const isAudio = contentType.startsWith('audio/') || /music|audio/i.test(parsed.pathname);
+            const extension = isAudio ? 'mp3' : 'mp4';
             const requestedName = String(req.query.name || 'tiktok-media').replace(/[^a-z0-9_-]/gi, '_').slice(0, 80) || 'tiktok-media';
             res.status(200);
-            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Type', contentType || (isAudio ? 'audio/mpeg' : 'video/mp4'));
             res.setHeader('Content-Disposition', 'attachment; filename="' + requestedName + '.' + extension + '"');
+            res.setHeader('X-Content-Type-Options', 'nosniff');
             if (media.headers['content-length']) res.setHeader('Content-Length', media.headers['content-length']);
             media.data.on('error', () => { if (!res.headersSent) res.status(502); res.end(); });
             return media.data.pipe(res);
         } catch (error) {
-            return res.status(502).json({ status: false, message: 'Gagal mengambil file dari CDN TikTok.' });
+            console.error('[TIKTOK-FILE]', error.message);
+            if (!res.headersSent) return res.status(502).json({ status: false, message: 'Gagal mengambil file dari CDN TikTok. Silakan coba lagi.' });
+            return res.end();
         }
     });
 
@@ -64,16 +86,37 @@ module.exports = function (app) {
             });
             const data = response.data?.data;
             if (response.data?.code !== 0 || !data) throw new Error(response.data?.msg || 'Provider TikTok tidak menemukan video.');
+
             const videos = [];
-            const addVideo = (quality, link) => {
-                if (typeof link === 'string' && /^https?:\/\//i.test(link) && !videos.some(item => item.url === link)) videos.push({ quality, format: 'mp4', url: link });
+            const addVideo = (quality, value) => {
+                const link = normalizeMediaUrl(value);
+                if (link && isAllowedMediaHost(new URL(link).hostname) && !videos.some(item => item.url === link)) {
+                    videos.push({ quality, format: 'mp4', url: link });
+                }
             };
             addVideo('HD', data.hdplay);
             addVideo('Standard', data.play);
-            const audio = typeof data.music === 'string' && /^https?:\/\//i.test(data.music) ? data.music : null;
+
+            // music_info.play is the preferred playable audio URL; data.music can be a legacy path.
+            const audioValue = data.music_info?.play || data.music;
+            const audioUrl = normalizeMediaUrl(audioValue);
+            const audio = audioUrl && isAllowedMediaHost(new URL(audioUrl).hostname)
+                ? { format: 'mp3', url: audioUrl }
+                : null;
+
             if (!videos.length && !audio) throw new Error('Tautan video/audio tidak tersedia dari provider.');
-            return res.status(200).json({ status: true, result: { title: data.title || 'TikTok media', thumbnail: data.cover || data.origin_cover || null, duration: data.duration || null, video: videos, audio: audio ? { format: 'mp3', url: audio } : null } });
+            return res.status(200).json({
+                status: true,
+                result: {
+                    title: data.title || 'TikTok media',
+                    thumbnail: data.cover || data.origin_cover || null,
+                    duration: data.duration || null,
+                    video: videos,
+                    audio
+                }
+            });
         } catch (error) {
+            console.error('[TIKTOK]', error.message);
             return res.status(502).json({ status: false, message: error.message || 'TikTok provider sedang bermasalah.' });
         }
     });
