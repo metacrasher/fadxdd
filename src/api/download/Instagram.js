@@ -81,12 +81,31 @@ async function igdl(url) {
         throw new Error(`Provider Instagram merespons HTTP ${response.status}.`);
     }
 
-    const payload = response.data;
+    // Provider dapat mengirim JSON sebagai object maupun string.
+    let payload = response.data;
+    if (typeof payload === 'string') {
+        const trimmed = payload.trim();
+        try {
+            payload = JSON.parse(trimmed);
+        } catch {
+            throw new Error(trimmed && trimmed.length < 220
+                ? `Provider Instagram: ${trimmed}`
+                : 'Provider Instagram mengirim format respons yang bukan JSON valid.');
+        }
+    }
     if (!payload || typeof payload !== 'object') {
-        throw new Error('Provider Instagram mengirim respons yang tidak dikenali. Coba lagi nanti.');
+        throw new Error('Provider Instagram mengirim respons kosong atau format yang tidak dikenali.');
     }
 
-    const media = payload.mediaInfo || payload.media || payload.result || payload.data || payload;
+    // Unwrap common provider envelopes without assuming one fixed response shape.
+    let media = payload;
+    for (let depth = 0; depth < 5; depth++) {
+        if (Array.isArray(media)) break;
+        const nested = media.mediaInfo ?? media.media_info ?? media.media ??
+            media.result ?? media.data ?? media.response;
+        if (!nested || nested === media || typeof nested !== 'object') break;
+        media = nested;
+    }
     const candidates = collectMediaCandidates(media);
     const unique = [...new Map(candidates.map(item => [item.url, item])).values()];
     const audio = unique.find(item => item.kind === 'audio') || null;
@@ -94,14 +113,14 @@ async function igdl(url) {
 
     // Support the documented AHM7 response and common alternate field names.
     const directVideo = safeMediaUrl(
-        media.videoUrl || media.video_url || media.downloadUrl || media.download_url ||
-        media.url || payload.videoUrl || payload.video_url
-    );
+        media.videoUrl || media.video_url || media.video || media.downloadUrl || media.download_url ||
+        media.download || media.url || payload.videoUrl || payload.video_url || payload.url
+    ) || safeMediaUrl(typeof media.video === 'object' ? (media.video.url || media.video.downloadUrl) : null);
     if (!video.length && directVideo) video.push({ quality: 'Terbaik', url: directVideo });
 
     const directAudio = safeMediaUrl(
         media.audioUrl || media.audio_url || media.musicUrl || media.music_url ||
-        media.audio?.url || payload.audioUrl || payload.audio_url
+        media.audio?.url || media.music?.url || payload.audioUrl || payload.audio_url
     );
     const audioResult = audio || (directAudio ? { quality: 'MP3', url: directAudio } : null);
 
