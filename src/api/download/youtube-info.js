@@ -3,13 +3,13 @@ const { metadata } = require('@vreden/youtube_scraper');
 function isValidYoutubeUrl(value) {
     try {
         const parsed = new URL(value);
-        const host = parsed.hostname.toLowerCase().replace(/^www\\./, '');
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
         const allowed = ['youtube.com', 'm.youtube.com', 'youtu.be', 'youtube-nocookie.com'];
         if (!allowed.includes(host) && !host.endsWith('.youtube.com')) return false;
         const id = host === 'youtu.be'
             ? parsed.pathname.split('/').filter(Boolean)[0]
             : (parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop());
-        return /^[\\w-]{11}$/.test(id || '');
+        return /^[\w-]{11}$/.test(id || '');
     } catch {
         return false;
     }
