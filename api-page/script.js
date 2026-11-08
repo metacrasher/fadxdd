@@ -472,6 +472,17 @@ function openApiModal(item) {
     const executeButton = document.getElementById('submitQueryBtn');
     const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
 
+    // Remove stale validation/error output as soon as the user edits a YouTube URL.
+    if (isYoutube && urlInput) {
+        urlInput.addEventListener('input', () => {
+            const responseContent = document.getElementById('apiResponseContent');
+            if (responseContent?.querySelector('.api-error-message')) {
+                responseContent.textContent = '';
+                responseContent.classList.add('d-none');
+            }
+        });
+    }
+
     if (isYoutube) {
         if (executeButton) executeButton.disabled = true;
         youtubePreviewGroup = document.createElement('section');
@@ -666,6 +677,7 @@ function findMediaMetadata(data) {
     };
     return {
         title: metadata?.title || findValue(metadata, /^(title|name)$/i) || 'Video YouTube',
+        caption: findValue(metadata, /^(caption|description|desc|sharetext|share_text)$/i),
         thumbnail: findValue(metadata, /(thumbnail|thumb|image|cover)/i),
         duration: metadata?.duration || metadata?.timestamp || findValue(metadata, /(duration|timestamp|length)/i),
         author: metadata?.author?.name || metadata?.author || metadata?.channel || ''
@@ -718,7 +730,9 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         }
         const heading = document.createElement('p');
         heading.className = 'api-result-heading';
-        heading.textContent = result.title || 'TikTok media';
+        const postCaption = findMediaMetadata(data).caption;
+        heading.textContent = postCaption || result.title || 'TikTok media';
+        heading.classList.add('tiktok-post-caption');
         container.appendChild(heading);
         if (!options.length) {
             const note = document.createElement('p');
@@ -924,7 +938,9 @@ async function executeApiRequest() {
             if (!input.value) throw new Error(`Kolom ${input.parameter} wajib diisi.`);
         }
 
-        const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(60000) });
+        // YouTube MP3 conversion can take longer than ordinary API calls.
+        const requestTimeout = item.id === 'youtube' && mode === 'audio' ? 180000 : 60000;
+        const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(requestTimeout) });
         responseStatus = response.status;
         serverFailure = response.status >= 500 || response.status === 429;
         const contentType = response.headers.get('content-type') || '';
