@@ -197,7 +197,42 @@ function renderCategories(categories) {
             top.className = 'api-item-top';
             const method = document.createElement('span');
             method.className = 'api-method';
-            method.textContent = 'GET';
+            method.setAttribute('aria-label', item.name || 'API');
+            const appLogos = {
+                status: {
+                    label: 'Status server',
+                    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 20V4"/></svg>'
+                },
+                cekstatus: {
+                    label: 'Status pembayaran',
+                    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>'
+                },
+                instagram: { src: 'https://cdn.simpleicons.org/instagram/E4405F', alt: 'Instagram' },
+                spotify: { src: 'https://cdn.simpleicons.org/spotify/1DB954', alt: 'Spotify' },
+                tiktok: { src: 'https://cdn.simpleicons.org/tiktok/FFFFFF', alt: 'TikTok' },
+                youtube: { src: 'https://cdn.simpleicons.org/youtube/FF0033', alt: 'YouTube' }
+            };
+            const appLogo = appLogos[item.id];
+            if (appLogo?.svg) {
+                method.setAttribute('aria-label', appLogo.label);
+                method.innerHTML = appLogo.svg;
+                method.classList.add('api-method-symbol');
+            } else if (appLogo?.src) {
+                const logo = document.createElement('img');
+                logo.className = 'api-method-logo';
+                logo.src = appLogo.src;
+                logo.alt = appLogo.alt;
+                logo.loading = 'lazy';
+                logo.referrerPolicy = 'no-referrer';
+                logo.onerror = () => {
+                    logo.remove();
+                    method.textContent = 'GET';
+                    method.classList.add('api-method-fallback');
+                };
+                method.appendChild(logo);
+            } else {
+                method.textContent = 'GET';
+            }
             const endpointName = document.createElement('h4');
             endpointName.className = 'api-item-name';
             endpointName.textContent = item.name || 'API Service';
@@ -392,25 +427,20 @@ function openApiModal(item) {
 
     title.textContent = item.name || 'API Service';
     description.textContent = item.desc || '';
-    endpoint.textContent = item.path || '';
+    endpoint.textContent = '';
+    endpoint.classList.add('d-none');
     inputContainer.innerHTML = '';
     if (responseContent) { responseContent.textContent = ''; responseContent.classList.add('d-none'); }
 
     const isYoutube = item.id === 'youtube';
+    const isTikTok = item.id === 'tiktok';
     const parsedUrl = new URL(item.path, window.location.origin);
     const parameters = [...parsedUrl.searchParams.keys()];
-    if (isYoutube) {
+    if (isYoutube || isTikTok) {
         const modeGroup = document.createElement('div');
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
         inputContainer.appendChild(modeGroup);
-        const qualityGroup = document.createElement('div');
-        qualityGroup.className = 'mb-3 api-input-group';
-        qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Kualitas video</label><select id="yt-quality" class="form-select"><option>144p</option><option>240p</option><option>360p</option><option>480p</option><option>720p</option><option>1080p</option><option>1440p</option><option>2160p</option><option value="best">Kualitas tertinggi tersedia</option></select>';
-        inputContainer.appendChild(qualityGroup);
-        document.getElementById('yt-mode').addEventListener('change', event => {
-            qualityGroup.style.display = event.target.value === 'audio' ? 'none' : '';
-        });
     }
     parameters.forEach((parameter, index) => {
         const group = document.createElement('div');
@@ -521,6 +551,39 @@ function renderApiResult(container, data, mode, quality) {
         }
     }
 
+    if (activeApiItem?.id === 'tiktok') {
+        const result = data?.result || {};
+        const selectedMode = mode || document.getElementById('yt-mode')?.value || 'video';
+        const options = selectedMode === 'audio'
+            ? (result.audio ? [{ quality: 'MP3', url: result.audio.url }] : [])
+            : (Array.isArray(result.video) ? result.video.map(v => ({ quality: v.quality || 'MP4', url: v.url })) : []);
+        if (result.thumbnail) {
+            const image = document.createElement('img');
+            image.className = 'yt-video-thumbnail';
+            image.src = result.thumbnail;
+            image.alt = 'Thumbnail TikTok';
+            container.appendChild(image);
+        }
+        const heading = document.createElement('p');
+        heading.className = 'api-result-heading';
+        heading.textContent = result.title || 'TikTok media';
+        container.appendChild(heading);
+        if (!options.length) {
+            const note = document.createElement('p');
+            note.className = 'small text-warning';
+            note.textContent = selectedMode === 'audio' ? 'Audio MP3 tidak tersedia untuk video ini.' : 'Video MP4 tidak tersedia.';
+            container.appendChild(note);
+        }
+        options.forEach(option => {
+            const anchor = document.createElement('a');
+            anchor.className = 'api-download-button';
+            anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent((result.title || 'tiktok-video').slice(0, 80));
+            anchor.setAttribute('download', '');
+            anchor.textContent = '⬇ Unduh ' + option.quality;
+            container.appendChild(anchor);
+        });
+        return;
+    }
     const links = collectDownloadLinks(data);
     const qualityRank = value => {
         const match = String(value).match(/(\d{3,4})\s*p/i);
@@ -583,6 +646,21 @@ function renderApiResult(container, data, mode, quality) {
         container.prepend(note);
     }
 }
+function cleanApiErrorMessage(value) {
+    let message = String(value ?? '').trim();
+
+    // Hide HTTP status codes (for example 400, 404, 500, 504) from user-facing alerts.
+    message = message
+        .replace(/\bHTTP\s*[45]\d{2}\b\s*:?[ \t]*/gi, '')
+        .replace(/\b[45]\d{2}\b\s*:\s*/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+
+    // Avoid showing a bare technical error label when the code was the only detail.
+    message = message.replace(/^(?:error|eror)\s*:?\s*/i, '');
+    return message || 'Terjadi gangguan pada server. Silakan coba lagi nanti.';
+}
+
 async function executeApiRequest() {
     if (!activeApiItem) return;
     const executeButton = document.getElementById('submitQueryBtn');
@@ -598,6 +676,9 @@ async function executeApiRequest() {
     responseContent.classList.add('d-none');
     responseContent.innerHTML = '';
 
+    let responseStatus = null;
+    let serverFailure = false;
+
     try {
         let url = new URL(item.path, window.location.origin);
         document.querySelectorAll('#apiQueryInputContainer .api-param-input').forEach(input => {
@@ -607,12 +688,12 @@ async function executeApiRequest() {
 
         let mode = '';
         let quality = '';
-        if (item.id === 'youtube') {
+        if (item.id === 'youtube' || item.id === 'tiktok') {
             mode = document.getElementById('yt-mode')?.value || 'video';
-            quality = document.getElementById('yt-quality')?.value || 'best';
+            quality = 'best';
             const videoUrl = url.searchParams.get('url');
-            if (!videoUrl) throw new Error('Link YouTube wajib diisi.');
-            url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
+            if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : 'Masukan link TikTok yang valid.');
+            if (item.id === 'youtube') url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
             url.searchParams.set('url', videoUrl);
         }
 
@@ -621,6 +702,8 @@ async function executeApiRequest() {
         }
 
         const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(60000) });
+        responseStatus = response.status;
+        serverFailure = response.status >= 500 || response.status === 429;
         const contentType = response.headers.get('content-type') || '';
         const raw = await response.text();
         let data;
@@ -628,16 +711,30 @@ async function executeApiRequest() {
         catch { data = raw; }
 
         responseContent.classList.remove('d-none');
-        if (!response.ok || data?.status === false) throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
+        if (!response.ok || data?.status === false) {
+            // Client/input errors (4xx, except throttling) must not mark a healthy API red.
+            // A 5xx/429 or an explicit provider/server failure is a technical failure.
+            serverFailure = serverFailure || response.status >= 500 || response.status === 429 ||
+                (response.status >= 200 && response.status < 300 && data?.status === false);
+            throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
+        }
         renderApiResult(responseContent, data, mode, quality);
         setApiHealth(item.id || item.name, true);
     } catch (error) {
         responseContent.classList.remove('d-none');
         const message = document.createElement('p');
         message.className = 'api-error-message';
-        message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : error.message;
+        message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : cleanApiErrorMessage(error.message);
         responseContent.appendChild(message);
-        setApiHealth(item.id || item.name, false);
+        // Missing/invalid user input and ordinary HTTP 4xx responses are not API outages.
+        // Only server-side failures, throttling, timeouts, or network failures turn the indicator red.
+        const isNetworkFailure = error instanceof TypeError || error.name === 'TimeoutError' ||
+            error.name === 'NetworkError' || error.name === 'AbortError';
+        if (serverFailure || isNetworkFailure) {
+            setApiHealth(item.id || item.name, false);
+        } else if (responseStatus === null) {
+            // Validation failed before the request reached the server: preserve the current color.
+        }
         console.error('[FadXD API] Request error:', error);
     } finally {
         if (loading) loading.classList.add('d-none');

@@ -3,8 +3,10 @@ const fetch = require('node-fetch');
 function getYoutubeId(value) {
     try {
         const parsed = new URL(value);
-        if (parsed.hostname.includes('youtu.be')) return parsed.pathname.split('/').filter(Boolean)[0];
-        return parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop();
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+        if (!['youtube.com', 'm.youtube.com', 'youtu.be', 'youtube-nocookie.com'].includes(host) && !host.endsWith('.youtube.com')) return null;
+        if (host === 'youtu.be') return parsed.pathname.split('/').filter(Boolean)[0] || null;
+        return parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop() || null;
     } catch {
         return null;
     }
@@ -43,7 +45,7 @@ async function convertYoutube(url, format) {
 module.exports = function (app) {
     app.get('/download/ytmp3', async (req, res) => {
         try {
-            if (!req.query.url) return res.status(400).json({ status: false, message: 'Parameter url wajib diisi.' });
+            if (!getYoutubeId(String(req.query.url || '').trim()) || !/^[\w-]{11}$/.test(getYoutubeId(String(req.query.url || '').trim()) || '')) return res.status(400).json({ status: false, message: 'Masukan link youtube yang valid.' });
             const result = await convertYoutube(req.query.url, 'mp3');
             return res.status(200).json({ status: true, result });
         } catch (error) {
