@@ -622,7 +622,7 @@ function cleanApiErrorMessage(value) {
         .trim();
 
     // Avoid showing a bare technical error label when the code was the only detail.
-    message = message.replace(/^(?:error|eror)\s*:?\s*$/i, '');
+    message = message.replace(/^(?:error|eror)\s*:?\s*/i, '');
     return message || 'Terjadi gangguan pada server. Silakan coba lagi nanti.';
 }
 
