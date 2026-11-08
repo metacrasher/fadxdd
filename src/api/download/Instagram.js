@@ -27,9 +27,9 @@ async function getInstagramPageMetadata(url) {
             String($('title').first().text() || '').trim();
         const caption = meta('meta[property="og:description"]') || meta('meta[name="description"]') ||
             meta('meta[name="twitter:description"]');
-        const ownerMatch = (title + ' ' + caption).match(/(?:^|[\s•])@?([a-zA-Z0-9._]{2,30})\\s+(?:on Instagram|di Instagram)/i);
+        const ownerMatch = (title + ' ' + caption).match(/(?:^|[\s•])@?([a-zA-Z0-9._]{2,30})\s+(?:on Instagram|di Instagram)/i);
         return {
-            title: (caption || title || '').replace(/\\s+/g, ' ').trim().slice(0, 180),
+            title: (caption || title || '').replace(/\s+/g, ' ').trim().slice(0, 180),
             owner: ownerMatch ? ownerMatch[1] : ''
         };
     } catch {
