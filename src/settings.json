@@ -2,22 +2,64 @@
   "name": "FadXD API",
   "version": "v3.1.0",
   "description": "Downloader dan layanan API FadXD — praktis, cepat, dan mudah digunakan.",
-  "apiSettings": { "creator": "FadStore", "apikey": ["fadcode"] },
+  "apiSettings": {
+    "creator": "FadStore",
+    "apikey": [
+      "fadcode"
+    ]
+  },
   "links": [],
   "categories": [
-    { "name": "SYSTEM", "items": [
-      { "id": "status", "name": "Status API", "desc": "Pantau kondisi server FadXD secara langsung.", "path": "/api/status" }
-    ]},
-    { "name": "PAYMENT", "items": [
-      { "id": "cekstatus", "name": "Cek Status Pembayaran", "desc": "Periksa transaksi QRIS Orderkuota menggunakan kredensial Anda.", "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut=" }
-    ]},
-    { "name": "SOCIAL MEDIA DOWNLOADER", "items": [
-      { "id": "instagram", "name": "Instagram Downloader", "desc": "Ambil media dari tautan postingan, Reels, atau video Instagram.", "path": "/download/instagram?url=" },
-      { "id": "spotify", "name": "Spotify Downloader", "desc": "Dapatkan tautan unduhan lagu dari Spotify.", "path": "/download/spotify?url=" },
-      { "id": "tiktok", "name": "TikTok Downloader", "desc": "Unduh video TikTok tanpa watermark atau audio jika tersedia.", "path": "/download/tiktok?url=" }
-    ]},
-    { "name": "YOUTUBE DOWNLOADER", "items": [
-      { "id": "youtube", "name": "YouTube Downloader", "desc": "Satu menu untuk video MP4 atau musik MP3, dengan pilihan kualitas video.", "path": "/download/ytdl-v2?url=" }
-    ]}
+    {
+      "name": "SYSTEM",
+      "items": [
+        {
+          "id": "status",
+          "name": "Status API",
+          "desc": "Pantau kondisi server FadXD secara langsung.",
+          "path": "/api/status"
+        }
+      ]
+    },
+    {
+      "name": "PAYMENT",
+      "items": [
+        {
+          "id": "cekstatus",
+          "name": "Cek Status Pembayaran",
+          "desc": "Periksa transaksi QRIS Orderkuota menggunakan kredensial Anda.",
+          "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut="
+        }
+      ]
+    },
+    {
+      "name": "SOCIAL MEDIA DOWNLOADER",
+      "items": [
+        {
+          "id": "youtube",
+          "name": "YouTube Downloader",
+          "desc": "Satu menu untuk video MP4 atau musik MP3, dengan pilihan kualitas video.",
+          "path": "/download/ytdl-v2?url="
+        },
+        {
+          "id": "tiktok",
+          "name": "TikTok Downloader",
+          "desc": "Unduh video TikTok tanpa watermark atau audio jika tersedia.",
+          "path": "/download/tiktok?url="
+        },
+        {
+          "id": "instagram",
+          "name": "Instagram Downloader",
+          "desc": "Ambil media dari tautan postingan, Reels, atau video Instagram.",
+          "path": "/download/instagram?url="
+        },
+        {
+          "id": "spotify",
+          "name": "Spotify Downloader",
+          "desc": "Dapatkan tautan unduhan lagu dari Spotify.",
+          "path": "/download/spotify?url="
+        }
+      ]
+    }
   ]
 }
