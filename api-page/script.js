@@ -631,6 +631,9 @@ function renderApiResult(container, data, mode, quality) {
             container.appendChild(anchor);
         });
     }
+    // Keep provider/CDN URLs out of the visible result for successful media downloads.
+    if ((mode === 'audio' || mode === 'video') && links.length) return;
+
     const details = document.createElement('details');
     details.className = 'api-raw-result';
     const summary = document.createElement('summary');
