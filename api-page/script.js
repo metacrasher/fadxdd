@@ -781,11 +781,34 @@ function renderApiResult(container, data, mode, quality) {
     const details = document.createElement('details');
     details.className = 'api-raw-result';
     const summary = document.createElement('summary');
-    summary.textContent = 'Lihat detail respons API';
+    summary.innerHTML = '<span class="api-raw-summary-icon" aria-hidden="true">{ }</span><span class="api-raw-summary-copy"><strong>Lihat detail respons API</strong><small>Data teknis • JSON response</small></span><span class="api-raw-summary-badge">TERLINDUNGI</span>';
+    const panel = document.createElement('div');
+    panel.className = 'api-raw-panel';
+    const toolbar = document.createElement('div');
+    toolbar.className = 'api-raw-toolbar';
+    toolbar.innerHTML = '<span><i></i> RESPONSE DATA</span><span class="api-raw-format">JSON</span>';
     const pre = document.createElement('pre');
+    pre.className = 'api-raw-content';
     pre.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-    details.append(summary, pre);
+    pre.setAttribute('aria-label', 'Detail respons API');
+    panel.append(toolbar, pre);
+    details.append(summary, panel);
     container.appendChild(details);
+
+    // Discourage casual copying from this response panel. Browser DevTools/network
+    // access cannot be prevented for data that is delivered to the client.
+    const blockCopy = event => {
+        event.preventDefault();
+        if (event.clipboardData) event.clipboardData.setData('text/plain', '');
+    };
+    ['copy', 'cut', 'contextmenu', 'dragstart', 'selectstart'].forEach(type => {
+        pre.addEventListener(type, blockCopy);
+    });
+    pre.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'x'].includes(event.key.toLowerCase())) {
+            event.preventDefault();
+        }
+    });
     // Generic "respons diterima" notices are intentionally omitted.
     // The Status API keeps its normal raw response details above.
 }
