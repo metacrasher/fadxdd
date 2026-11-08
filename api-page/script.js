@@ -441,6 +441,15 @@ function openApiModal(item) {
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
         inputContainer.appendChild(modeGroup);
+        if (isYoutube) {
+            const qualityGroup = document.createElement('div');
+            qualityGroup.className = 'mb-3 api-input-group';
+            qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Resolusi video</label><select id="yt-quality" class="form-select"><option value="144">144p</option><option value="360" selected>360p</option><option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select>';
+            inputContainer.appendChild(qualityGroup);
+            document.getElementById('yt-mode').addEventListener('change', event => {
+                qualityGroup.style.display = event.target.value === 'video' ? '' : 'none';
+            });
+        }
     }
     parameters.forEach((parameter, index) => {
         const group = document.createElement('div');
@@ -577,7 +586,7 @@ function renderApiResult(container, data, mode, quality) {
         options.forEach(option => {
             const anchor = document.createElement('a');
             anchor.className = 'api-download-button';
-            anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent((result.title || 'tiktok-video').slice(0, 80));
+            anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent((result.title || 'tiktok-media').slice(0, 80)) + (selectedMode === 'audio' ? '&format=mp3' : '&format=mp4');
             anchor.setAttribute('download', '');
             anchor.textContent = '⬇ Unduh ' + option.quality;
             container.appendChild(anchor);
@@ -624,9 +633,9 @@ function renderApiResult(container, data, mode, quality) {
             const anchor = document.createElement('a');
             anchor.className = 'api-download-button';
             anchor.href = link.url;
-            anchor.target = '_blank';
-            anchor.rel = 'noopener noreferrer';
-            anchor.download = '';
+            anchor.removeAttribute('target');
+            anchor.removeAttribute('rel');
+            anchor.setAttribute('download', '');
             anchor.textContent = mode === 'audio' ? '⬇ Unduh Musik MP3' : `⬇ Unduh Video ${link.label || (index + 1)}`;
             container.appendChild(anchor);
         });
@@ -696,7 +705,11 @@ async function executeApiRequest() {
             quality = 'best';
             const videoUrl = url.searchParams.get('url');
             if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : 'Masukan link TikTok yang valid.');
-            if (item.id === 'youtube') url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
+            if (item.id === 'youtube') {
+                const selectedQuality = document.getElementById('yt-quality')?.value || '360';
+                url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
+                if (mode === 'video') url.searchParams.set('quality', selectedQuality);
+            }
             url.searchParams.set('url', videoUrl);
         }
 
