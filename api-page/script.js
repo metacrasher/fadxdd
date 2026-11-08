@@ -484,7 +484,7 @@ function openApiModal(item) {
 function collectDownloadLinks(value, label = 'Download', output = [], seen = new Set()) {
     if (!value) return output;
     if (typeof value === 'string') {
-        const isHttpUrl = value.startsWith('https://') || value.startsWith('http://');
+        const isHttpUrl = value.startsWith('https://') || value.startsWith('http://') || value.startsWith('/download/youtube/file');
         const looksLikeMedia = /[.](mp3|mp4|m4a|webm|mkv|jpg|jpeg|png)(?:[?#]|$)/i.test(value);
         const downloadContext = /(download|video|audio|mp3|mp4|file|link|url)/i.test(label);
         if (isHttpUrl && (looksLikeMedia || downloadContext) && !/(thumbnail|avatar|cover|image)/i.test(label)) {
