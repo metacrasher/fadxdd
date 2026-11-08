@@ -3,7 +3,7 @@ const axios = require('axios');
 function validTikTokUrl(value) {
     try {
         const u = new URL(value);
-        return /(^|\\.)tiktok\\.com$/i.test(u.hostname);
+        return /(^|\.)tiktok\.com$/i.test(u.hostname);
     } catch { return false; }
 }
 
@@ -25,11 +25,11 @@ module.exports = function (app) {
             if (response.data?.code !== 0 || !data) throw new Error(response.data?.msg || 'Provider TikTok tidak menemukan video.');
             const videos = [];
             const addVideo = (quality, link) => {
-                if (typeof link === 'string' && /^https?:\\/\\//i.test(link) && !videos.some(item => item.url === link)) videos.push({ quality, format: 'mp4', url: link });
+                if (typeof link === 'string' && /^https?:\/\//i.test(link) && !videos.some(item => item.url === link)) videos.push({ quality, format: 'mp4', url: link });
             };
             addVideo('HD', data.hdplay);
             addVideo('Standard', data.play);
-            const audio = typeof data.music === 'string' && /^https?:\\/\\//i.test(data.music) ? data.music : null;
+            const audio = typeof data.music === 'string' && /^https?:\/\//i.test(data.music) ? data.music : null;
             if (!videos.length && !audio) throw new Error('Tautan video/audio tidak tersedia dari provider.');
             return res.status(200).json({ status: true, result: { title: data.title || 'TikTok media', thumbnail: data.cover || data.origin_cover || null, duration: data.duration || null, video: videos, audio: audio ? { format: 'mp3', url: audio } : null } });
         } catch (error) {
