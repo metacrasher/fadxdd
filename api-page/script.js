@@ -484,7 +484,7 @@ function openApiModal(item) {
             let parsed;
             try {
                 parsed = new URL(value);
-                if (!/(^|\\.)((youtube\\.com)|(youtu\\.be))$/i.test(parsed.hostname)) throw new Error('URL bukan YouTube');
+                if (!/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsed.hostname)) throw new Error('URL bukan YouTube');
             } catch {
                 qualityGroup.style.display = 'none';
                 return;
