@@ -286,7 +286,7 @@ function setApiHealth(id, online) {
     el.classList.toggle('is-offline', !online);
     el.classList.remove('is-unknown');
     const label = el.querySelector('span');
-    if (label) label.textContent = online ? 'API AKTIF' : 'API ERROR';
+    if (label) label.textContent = online ? (['tiktok', 'youtube'].includes(id) ? 'AKTIF' : 'API AKTIF') : 'API ERROR';
 }
 
 /* =========================================
@@ -670,7 +670,9 @@ function renderApiResult(container, data, mode, quality) {
     container.innerHTML = '';
     if (mode === 'video' || mode === 'audio') {
         const info = findMediaMetadata(data);
-        if (info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
+        // YouTube video preview is already shown above the form; avoid rendering it twice after processing.
+        const showResultThumbnail = !(activeApiItem?.id === 'youtube' && mode === 'video');
+        if (showResultThumbnail && info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
             const image = document.createElement('img');
