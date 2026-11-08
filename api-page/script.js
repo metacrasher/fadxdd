@@ -616,13 +616,13 @@ function cleanApiErrorMessage(value) {
 
     // Hide HTTP status codes (for example 400, 404, 500, 504) from user-facing alerts.
     message = message
-        .replace(/\\bHTTP\\s*[45]\\d{2}\\b\\s*:?[ \\t]*/gi, '')
-        .replace(/\\b[45]\\d{2}\\b\\s*:\\s*/g, '')
-        .replace(/\\s{2,}/g, ' ')
+        .replace(/\bHTTP\s*[45]\d{2}\b\s*:?[ \t]*/gi, '')
+        .replace(/\b[45]\d{2}\b\s*:\s*/g, '')
+        .replace(/\s{2,}/g, ' ')
         .trim();
 
     // Avoid showing a bare technical error label when the code was the only detail.
-    message = message.replace(/^(?:error|eror)\\s*:?\\s*$/i, '');
+    message = message.replace(/^(?:error|eror)\s*:?\s*$/i, '');
     return message || 'Terjadi gangguan pada server. Silakan coba lagi nanti.';
 }
 
