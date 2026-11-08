@@ -199,15 +199,25 @@ function renderCategories(categories) {
             method.className = 'api-method';
             method.setAttribute('aria-label', item.name || 'API');
             const appLogos = {
-                status: { src: '/anime-avatar.svg', alt: 'FadXD' },
-                cekstatus: { src: 'https://cdn.simpleicons.org/qris/FFFFFF', alt: 'QRIS' },
+                status: {
+                    label: 'Status server',
+                    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 20V4"/></svg>'
+                },
+                cekstatus: {
+                    label: 'Status pembayaran',
+                    svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></svg>'
+                },
                 instagram: { src: 'https://cdn.simpleicons.org/instagram/E4405F', alt: 'Instagram' },
                 spotify: { src: 'https://cdn.simpleicons.org/spotify/1DB954', alt: 'Spotify' },
                 tiktok: { src: 'https://cdn.simpleicons.org/tiktok/FFFFFF', alt: 'TikTok' },
                 youtube: { src: 'https://cdn.simpleicons.org/youtube/FF0033', alt: 'YouTube' }
             };
             const appLogo = appLogos[item.id];
-            if (appLogo) {
+            if (appLogo?.svg) {
+                method.setAttribute('aria-label', appLogo.label);
+                method.innerHTML = appLogo.svg;
+                method.classList.add('api-method-symbol');
+            } else if (appLogo?.src) {
                 const logo = document.createElement('img');
                 logo.className = 'api-method-logo';
                 logo.src = appLogo.src;
