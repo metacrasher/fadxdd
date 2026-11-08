@@ -17,7 +17,7 @@ module.exports = function (app) {
             const data = await response.json();
             const link = data?.data?.link;
             if (typeof link !== 'string' || !/^https?:\/\//i.test(link)) throw new Error(data?.message || 'Tautan unduhan Spotify tidak tersedia untuk konten ini.');
-            return res.status(200).json({ status: true, result: link });
+            return res.status(200).json({ status: true, result: { download: { format: 'mp3', url: link } } });
         } catch (error) {
             return res.status(502).json({ status: false, message: error.message || 'Spotify provider sedang bermasalah.' });
         }
