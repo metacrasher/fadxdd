@@ -197,7 +197,32 @@ function renderCategories(categories) {
             top.className = 'api-item-top';
             const method = document.createElement('span');
             method.className = 'api-method';
-            method.textContent = 'GET';
+            method.setAttribute('aria-label', item.name || 'API');
+            const appLogos = {
+                status: { src: '/anime-avatar.svg', alt: 'FadXD' },
+                cekstatus: { src: 'https://cdn.simpleicons.org/qris/FFFFFF', alt: 'QRIS' },
+                instagram: { src: 'https://cdn.simpleicons.org/instagram/E4405F', alt: 'Instagram' },
+                spotify: { src: 'https://cdn.simpleicons.org/spotify/1DB954', alt: 'Spotify' },
+                tiktok: { src: 'https://cdn.simpleicons.org/tiktok/FFFFFF', alt: 'TikTok' },
+                youtube: { src: 'https://cdn.simpleicons.org/youtube/FF0033', alt: 'YouTube' }
+            };
+            const appLogo = appLogos[item.id];
+            if (appLogo) {
+                const logo = document.createElement('img');
+                logo.className = 'api-method-logo';
+                logo.src = appLogo.src;
+                logo.alt = appLogo.alt;
+                logo.loading = 'lazy';
+                logo.referrerPolicy = 'no-referrer';
+                logo.onerror = () => {
+                    logo.remove();
+                    method.textContent = 'GET';
+                    method.classList.add('api-method-fallback');
+                };
+                method.appendChild(logo);
+            } else {
+                method.textContent = 'GET';
+            }
             const endpointName = document.createElement('h4');
             endpointName.className = 'api-item-name';
             endpointName.textContent = item.name || 'API Service';
