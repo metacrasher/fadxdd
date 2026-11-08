@@ -515,7 +515,22 @@ function openApiModal(item) {
         });
         urlInput?.addEventListener('change', loadYoutubeInfo);
         modeSelect.addEventListener('change', () => {
-            qualityGroup.style.display = modeSelect.value === 'video' && !!urlInput?.value.trim() ? '' : 'none';
+            // YouTube format changes start a fresh request: clear the previous URL and result.
+            // This handler is scoped to YouTube; TikTok behavior remains untouched.
+            if (urlInput) {
+                urlInput.value = '';
+                urlInput.placeholder = 'Masukkan link YouTube lagi untuk format ini';
+            }
+            metadataRequestId++;
+            clearTimeout(metadataTimer);
+            qualityGroup.style.display = 'none';
+            const status = document.getElementById('yt-quality-status');
+            if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
+            const responseContent = document.getElementById('apiResponseContent');
+            if (responseContent) {
+                responseContent.innerHTML = '';
+                responseContent.classList.add('d-none');
+            }
         });
     }
 
@@ -536,9 +551,10 @@ function collectDownloadLinks(value, label = 'Download', output = [], seen = new
     if (!value) return output;
     if (typeof value === 'string') {
         const isHttpUrl = value.startsWith('https://') || value.startsWith('http://') || value.startsWith('/download/youtube/file');
+        const isYoutubeFileRoute = value.startsWith('/download/youtube/file?');
         const looksLikeMedia = /[.](mp3|mp4|m4a|webm|mkv|jpg|jpeg|png)(?:[?#]|$)/i.test(value);
         const downloadContext = /(download|video|audio|mp3|mp4|file|link|url)/i.test(label);
-        if (isHttpUrl && (looksLikeMedia || downloadContext) && !/(thumbnail|avatar|cover|image)/i.test(label)) {
+        if (isHttpUrl && (isYoutubeFileRoute || looksLikeMedia || downloadContext) && !/(thumbnail|avatar|cover|image)/i.test(label)) {
             if (!seen.has(value)) { seen.add(value); output.push({ label, url: value }); }
         }
         return output;
