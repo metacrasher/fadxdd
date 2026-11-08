@@ -111,7 +111,7 @@ module.exports = function (app) {
             return res.status(200).json({
                 status: true,
                 result: {
-                    title: data.title || 'TikTok media',
+                    title: String(data.title || data.desc || (data.author?.nickname ? 'Video TikTok - ' + data.author.nickname : 'TikTok-' + (data.id || 'media'))).trim(),
                     thumbnail: data.cover || data.origin_cover || null,
                     duration: data.duration || null,
                     video: videos,
