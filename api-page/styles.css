@@ -206,3 +206,8 @@ body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;back
 .yt-video-info p{margin:7px 0 0;color:#8ca5b5;font-size:10px}
 .api-download-button{min-height:46px;gap:8px;font-size:12px;letter-spacing:.2px}
 @media(max-width:480px){.yt-video-preview{grid-template-columns:1fr}.yt-video-thumbnail{max-height:210px}}
+
+
+/* Clear visual symbols for server and payment status cards */
+.api-method-symbol svg{display:block;width:21px;height:21px}
+.api-item[data-name*="status"] .api-method-symbol{color:var(--cyan)}
