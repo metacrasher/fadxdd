@@ -792,6 +792,13 @@ async function executeApiRequest() {
             throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
         }
         renderApiResult(responseContent, data, mode, quality);
+        if (item.id === 'youtube' && mode === 'video') {
+            const downloadButton = responseContent.querySelector('.api-download-button');
+            if (downloadButton) {
+                // The server returns a same-origin streaming URL; start the file download after processing.
+                downloadButton.click();
+            }
+        }
         setApiHealth(item.id || item.name, true);
     } catch (error) {
         responseContent.classList.remove('d-none');
