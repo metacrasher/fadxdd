@@ -48,17 +48,20 @@ module.exports = function (app) {
                 headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://www.tiktok.com/' }
             });
 
+            const requestedFormat = String(req.query.format || '').toLowerCase() === 'mp3' ? 'mp3' : 'mp4';
             const contentType = String(media.headers['content-type'] || '').split(';')[0].toLowerCase();
             if (!contentType.startsWith('video/') && !contentType.startsWith('audio/') && contentType !== 'application/octet-stream') {
                 media.data.destroy();
                 return res.status(502).json({ status: false, message: 'Provider tidak mengirim file media yang valid.' });
             }
 
-            const isAudio = contentType.startsWith('audio/') || /music|audio/i.test(parsed.pathname);
+            // The UI explicitly marks music downloads as MP3; CDN paths often end in .mp4
+            // even when the URL points to TikTok's separate music stream.
+            const isAudio = requestedFormat === 'mp3';
             const extension = isAudio ? 'mp3' : 'mp4';
             const requestedName = String(req.query.name || 'tiktok-media').replace(/[^a-z0-9_-]/gi, '_').slice(0, 80) || 'tiktok-media';
             res.status(200);
-            res.setHeader('Content-Type', contentType || (isAudio ? 'audio/mpeg' : 'video/mp4'));
+            res.setHeader('Content-Type', isAudio ? 'audio/mpeg' : (contentType || 'video/mp4'));
             res.setHeader('Content-Disposition', 'attachment; filename="' + requestedName + '.' + extension + '"');
             res.setHeader('X-Content-Type-Options', 'nosniff');
             if (media.headers['content-length']) res.setHeader('Content-Length', media.headers['content-length']);
