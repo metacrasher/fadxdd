@@ -514,18 +514,28 @@ function openApiModal(item) {
             metadataTimer = setTimeout(loadYoutubeInfo, 650);
         });
         urlInput?.addEventListener('change', loadYoutubeInfo);
-        modeSelect.addEventListener('change', () => {
-            // YouTube format changes start a fresh request: clear the previous URL and result.
-            // This handler is scoped to YouTube; TikTok behavior remains untouched.
+
+    }
+
+    // Every downloader with a format selector starts fresh after a format switch.
+    // This resets only the form/result UI; API request and download logic stay unchanged.
+    if (isYoutube || isTikTok) {
+        const modeSelect = document.getElementById('yt-mode');
+        const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
+        modeSelect?.addEventListener('change', () => {
             if (urlInput) {
                 urlInput.value = '';
-                urlInput.placeholder = 'Masukkan link YouTube lagi untuk format ini';
+                urlInput.placeholder = isYoutube
+                    ? 'Masukkan link YouTube lagi untuk format ini'
+                    : 'Masukkan link TikTok lagi untuk format ini';
             }
-            metadataRequestId++;
-            clearTimeout(metadataTimer);
-            qualityGroup.style.display = 'none';
-            const status = document.getElementById('yt-quality-status');
-            if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
+            if (isYoutube) {
+                metadataRequestId++;
+                clearTimeout(metadataTimer);
+                qualityGroup.style.display = 'none';
+                const status = document.getElementById('yt-quality-status');
+                if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
+            }
             const responseContent = document.getElementById('apiResponseContent');
             if (responseContent) {
                 responseContent.innerHTML = '';
