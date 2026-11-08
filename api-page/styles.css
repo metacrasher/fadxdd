@@ -322,3 +322,39 @@ body:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;back
 .api-response-accepted span:last-child{display:grid;gap:3px}
 .api-response-accepted strong{font-size:12px;font-weight:800}
 .api-response-accepted small{color:#86b9aa;font-size:10px}
+
+
+/* Platform development notice and service status legend */
+.platform-notice{
+  display:flex;align-items:flex-start;gap:13px;
+  max-width:590px;margin:0 0 24px;padding:15px 17px;
+  border:1px solid rgba(0,229,255,.2);
+  border-left:3px solid var(--cyan);
+  border-radius:8px;
+  background:linear-gradient(110deg,rgba(0,229,255,.075),rgba(7,20,30,.58));
+  box-shadow:inset 0 0 22px rgba(0,229,255,.025);
+}
+.platform-notice-icon{
+  display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;
+  border:1px solid rgba(0,229,255,.38);border-radius:50%;
+  color:var(--cyan);font:700 13px Inter,sans-serif;
+}
+.platform-notice-copy{min-width:0}
+.platform-notice-copy strong{display:block;margin:1px 0 5px;color:#e8faff;font-size:12px;font-weight:700}
+.platform-notice-copy p{margin:0;color:#91aab8;font-size:11px;line-height:1.7}
+.service-status-legend{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:3px}
+.service-status-item{
+  display:inline-flex;align-items:center;gap:7px;padding:8px 11px;
+  border:1px solid;border-radius:5px;font:600 9px Inter,sans-serif;
+  letter-spacing:.8px;white-space:nowrap;
+}
+.service-status-item i{width:7px;height:7px;border-radius:50%}
+.service-status-item.is-active{color:#70e7b8;border-color:rgba(0,229,168,.28);background:rgba(0,229,168,.07)}
+.service-status-item.is-active i{background:#00e5a8;box-shadow:0 0 10px rgba(0,229,168,.75)}
+.service-status-item.is-error{color:#ff8d98;border-color:rgba(255,85,105,.3);background:rgba(255,85,105,.07)}
+.service-status-item.is-error i{background:#ff5268;box-shadow:0 0 10px rgba(255,82,104,.7)}
+@media(max-width:767px){
+  .platform-notice{max-width:100%;margin-bottom:21px;padding:13px}
+  .section-heading{align-items:flex-start;flex-direction:column}
+  .service-status-legend{padding-bottom:0}
+}
