@@ -438,9 +438,10 @@ function openApiModal(item) {
 
     const isYoutube = item.id === 'youtube';
     const isTikTok = item.id === 'tiktok';
+    const isInstagram = item.id === 'instagram';
     const parsedUrl = new URL(item.path, window.location.origin);
     const parameters = [...parsedUrl.searchParams.keys()];
-    if (isYoutube || isTikTok) {
+    if (isYoutube || isTikTok || isInstagram) {
         const modeGroup = document.createElement('div');
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
@@ -715,6 +716,70 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         }
     }
 
+    if (item?.id === 'instagram') {
+        const result = data?.result || {};
+        const selectedMode = mode || 'video';
+        const heading = document.createElement('p');
+        heading.className = 'api-result-heading';
+        heading.textContent = result.title || 'Instagram media';
+        container.appendChild(heading);
+
+        if (selectedMode === 'audio') {
+            if (!result.audio?.url) {
+                const note = document.createElement('p');
+                note.className = 'small text-warning';
+                note.textContent = 'Audio MP3 tidak tersedia untuk postingan ini.';
+                container.appendChild(note);
+                return;
+            }
+            const audioLink = document.createElement('a');
+            audioLink.className = 'api-download-button';
+            audioLink.href = '/download/instagram/file?url=' + encodeURIComponent(result.audio.url) + '&format=mp3';
+            audioLink.setAttribute('download', '');
+            audioLink.textContent = '⬇ Download MP3';
+            container.appendChild(audioLink);
+            return;
+        }
+
+        const qualities = Array.isArray(result.video) ? result.video : [];
+        if (!qualities.length) {
+            const note = document.createElement('p');
+            note.className = 'small text-warning';
+            note.textContent = 'Video MP4 tidak tersedia untuk postingan ini.';
+            container.appendChild(note);
+            return;
+        }
+
+        const qualityGroup = document.createElement('div');
+        qualityGroup.className = 'mb-3 api-input-group';
+        const qualityLabel = document.createElement('label');
+        qualityLabel.className = 'form-label';
+        qualityLabel.textContent = 'Resolusi video';
+        const qualitySelect = document.createElement('select');
+        qualitySelect.className = 'form-select';
+        qualities.forEach((option, index) => {
+            const choice = document.createElement('option');
+            choice.value = String(index);
+            choice.textContent = option.quality || (index === 0 ? 'Terbaik' : `Pilihan ${index + 1}`);
+            qualitySelect.appendChild(choice);
+        });
+        qualityGroup.append(qualityLabel, qualitySelect);
+        container.appendChild(qualityGroup);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.className = 'api-download-button';
+        downloadLink.setAttribute('download', '');
+        const updateDownload = () => {
+            const selected = qualities[Number(qualitySelect.value)] || qualities[0];
+            downloadLink.href = '/download/instagram/file?url=' + encodeURIComponent(selected.url) + '&format=mp4';
+            downloadLink.textContent = '⬇ Download ' + (selected.quality || 'Video');
+        };
+        qualitySelect.addEventListener('change', updateDownload);
+        updateDownload();
+        container.appendChild(downloadLink);
+        return;
+    }
+
     if (item?.id === 'tiktok') {
         const result = data?.result || {};
         const selectedMode = mode || 'video';
@@ -909,13 +974,13 @@ async function executeApiRequest() {
 
         let mode = '';
         let quality = '';
-        if (item.id === 'youtube' || item.id === 'tiktok') {
+        if (item.id === 'youtube' || item.id === 'tiktok' || item.id === 'instagram') {
             mode = document.getElementById('yt-mode')?.value || 'video';
             quality = item.id === 'youtube' && mode === 'video'
                 ? (document.getElementById('yt-quality')?.value || '360')
                 : 'best';
             const videoUrl = url.searchParams.get('url');
-            if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : 'Masukan link TikTok yang valid.');
+            if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : item.id === 'instagram' ? 'Masukkan link Instagram yang valid.' : 'Masukan link TikTok yang valid.');
             if (item.id === 'youtube') {
                 let parsedVideoUrl;
                 try {
