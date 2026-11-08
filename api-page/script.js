@@ -461,8 +461,12 @@ function openApiModal(item) {
         inputContainer.appendChild(group);
     });
 
+    let qualityGroup = null;
+    let metadataTimer;
+    let metadataRequestId = 0;
+
     if (isYoutube) {
-        const qualityGroup = document.createElement('div');
+        qualityGroup = document.createElement('div');
         qualityGroup.className = 'mb-3 api-input-group';
         qualityGroup.id = 'yt-quality-group';
         qualityGroup.style.display = 'none';
@@ -471,8 +475,6 @@ function openApiModal(item) {
 
         const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
         const modeSelect = document.getElementById('yt-mode');
-        let metadataTimer;
-        let metadataRequestId = 0;
         const loadYoutubeInfo = async () => {
             const value = urlInput?.value.trim() || '';
             const requestId = ++metadataRequestId;
@@ -514,8 +516,33 @@ function openApiModal(item) {
             metadataTimer = setTimeout(loadYoutubeInfo, 650);
         });
         urlInput?.addEventListener('change', loadYoutubeInfo);
-        modeSelect.addEventListener('change', () => {
-            qualityGroup.style.display = modeSelect.value === 'video' && !!urlInput?.value.trim() ? '' : 'none';
+
+    }
+
+    // Every downloader with a format selector starts fresh after a format switch.
+    // This resets only the form/result UI; API request and download logic stay unchanged.
+    if (isYoutube || isTikTok) {
+        const modeSelect = document.getElementById('yt-mode');
+        const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
+        modeSelect?.addEventListener('change', () => {
+            if (urlInput) {
+                urlInput.value = '';
+                urlInput.placeholder = isYoutube
+                    ? 'Masukkan link YouTube lagi untuk format ini'
+                    : 'Masukkan link TikTok lagi untuk format ini';
+            }
+            if (isYoutube) {
+                metadataRequestId++;
+                clearTimeout(metadataTimer);
+                if (qualityGroup) qualityGroup.style.display = 'none';
+                const status = document.getElementById('yt-quality-status');
+                if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
+            }
+            const responseContent = document.getElementById('apiResponseContent');
+            if (responseContent) {
+                responseContent.innerHTML = '';
+                responseContent.classList.add('d-none');
+            }
         });
     }
 
@@ -536,9 +563,10 @@ function collectDownloadLinks(value, label = 'Download', output = [], seen = new
     if (!value) return output;
     if (typeof value === 'string') {
         const isHttpUrl = value.startsWith('https://') || value.startsWith('http://') || value.startsWith('/download/youtube/file');
+        const isYoutubeFileRoute = value.startsWith('/download/youtube/file?');
         const looksLikeMedia = /[.](mp3|mp4|m4a|webm|mkv|jpg|jpeg|png)(?:[?#]|$)/i.test(value);
         const downloadContext = /(download|video|audio|mp3|mp4|file|link|url)/i.test(label);
-        if (isHttpUrl && (looksLikeMedia || downloadContext) && !/(thumbnail|avatar|cover|image)/i.test(label)) {
+        if (isHttpUrl && (isYoutubeFileRoute || looksLikeMedia || downloadContext) && !/(thumbnail|avatar|cover|image)/i.test(label)) {
             if (!seen.has(value)) { seen.add(value); output.push({ label, url: value }); }
         }
         return output;
