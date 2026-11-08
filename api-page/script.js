@@ -252,7 +252,7 @@ function renderCategories(categories) {
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'api-open-button';
-            button.textContent = item.id === 'status' ? 'Cek Status Server' : 'Buka Layanan';
+            button.textContent = item.id === 'status' ? 'Cek Status Server' : ['instagram', 'spotify', 'tiktok', 'youtube'].includes(item.id) ? 'Unduh Sekarang' : 'Buka Layanan';
             button.addEventListener('click', () => openApiModal(item));
             footer.appendChild(button);
             card.append(top, status, description, footer);
