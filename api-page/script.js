@@ -744,8 +744,9 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
             const title = document.createElement('h4');
             title.textContent = result.title || 'Instagram media';
             info.appendChild(title);
+            const owner = result.owner || result.username || result.author || '';
             const meta = document.createElement('p');
-            meta.textContent = 'Video Instagram • MP4';
+            meta.textContent = [owner ? (String(owner).startsWith('@') ? String(owner) : '@' + String(owner)) : '', 'Video Instagram • MP4'].filter(Boolean).join(' • ');
             info.appendChild(meta);
             preview.appendChild(info);
             container.appendChild(preview);
