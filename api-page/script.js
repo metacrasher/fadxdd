@@ -781,13 +781,35 @@ function renderApiResult(container, data, mode, quality) {
     const details = document.createElement('details');
     details.className = 'api-raw-result';
     const summary = document.createElement('summary');
-    summary.textContent = 'Lihat detail respons API';
+    summary.innerHTML = '<span class="api-raw-summary-icon" aria-hidden="true">{ }</span><span class="api-raw-summary-copy"><strong>Lihat detail respons API</strong><small>Data teknis • JSON response</small></span><span class="api-raw-summary-badge">COPY DIBATASI</span>';
+    const panel = document.createElement('div');
+    panel.className = 'api-raw-panel';
+    const toolbar = document.createElement('div');
+    toolbar.className = 'api-raw-toolbar';
+    toolbar.innerHTML = '<span><i></i> RESPONSE DATA</span><span class="api-raw-format">JSON</span>';
     const pre = document.createElement('pre');
+    pre.className = 'api-raw-content';
     pre.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-    details.append(summary, pre);
+    pre.setAttribute('aria-label', 'Detail respons API');
+    panel.append(toolbar, pre);
+    details.append(summary, panel);
     container.appendChild(details);
-    // Generic "respons diterima" notices are intentionally omitted.
-    // The Status API keeps its normal raw response details above.
+
+    // Discourage casual copying from this response panel. Browser DevTools/network
+    // access cannot be prevented for data that is delivered to the client.
+    const blockCopy = event => {
+        event.preventDefault();
+        if (event.clipboardData) event.clipboardData.setData('text/plain', '');
+    };
+    ['copy', 'cut', 'contextmenu', 'dragstart', 'selectstart'].forEach(type => {
+        pre.addEventListener(type, blockCopy);
+    });
+    pre.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'x'].includes(event.key.toLowerCase())) {
+            event.preventDefault();
+        }
+    });
+    // The success acknowledgement is added by executeApiRequest only for Status API.
 }
 function cleanApiErrorMessage(value) {
     let message = String(value ?? '').trim();
@@ -878,6 +900,12 @@ async function executeApiRequest() {
             throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
         }
         renderApiResult(responseContent, data, mode, quality);
+        if (item.id === 'status') {
+            const accepted = document.createElement('div');
+            accepted.className = 'api-response-accepted';
+            accepted.innerHTML = '<span class="api-response-accepted-dot" aria-hidden="true"></span><span><strong>Respons diterima</strong><small>Status API berhasil merespons server.</small></span>';
+            responseContent.prepend(accepted);
+        }
         setApiHealth(item.id || item.name, true);
     } catch (error) {
         responseContent.classList.remove('d-none');
