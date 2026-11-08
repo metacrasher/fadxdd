@@ -19,37 +19,32 @@ function safeMediaUrl(value) {
     }
 }
 
-function collectMediaCandidates(value, output = [], depth = 0) {
+function collectMediaCandidates(value, output = [], depth = 0, mediaKind = 'video') {
     if (!value || typeof value !== 'object' || depth > 6) return output;
 
     if (Array.isArray(value)) {
-        value.forEach(item => collectMediaCandidates(item, output, depth + 1));
+        value.forEach(item => collectMediaCandidates(item, output, depth + 1, mediaKind));
         return output;
     }
 
-    const videoKeys = ['url', 'videoUrl', 'video_url', 'downloadUrl', 'download_url', 'hd', 'sd', 'high', 'low', 'play'];
-    const audioKeys = ['audioUrl', 'audio_url', 'musicUrl', 'music_url', 'mp3', 'audio'];
     const quality = value.quality || value.label || value.name || value.resolution || value.type;
+    const keys = mediaKind === 'audio'
+        ? ['url', 'audioUrl', 'audio_url', 'musicUrl', 'music_url', 'mp3', 'downloadUrl', 'download_url']
+        : ['url', 'videoUrl', 'video_url', 'downloadUrl', 'download_url', 'hd', 'sd', 'high', 'low', 'play'];
 
-    for (const key of videoKeys) {
-        const candidate = safeMediaUrl(value[key]);
-        if (candidate && !/\.(mp3|m4a|aac|ogg)(?:$|\?)/i.test(candidate)) {
-            output.push({ quality: String(quality || 'Terbaik'), url: candidate, kind: 'video' });
-        }
-    }
-
-    for (const key of audioKeys) {
+    for (const key of keys) {
         const raw = value[key];
         const candidate = safeMediaUrl(typeof raw === 'string' ? raw : raw?.url || raw?.downloadUrl);
-        if (candidate) output.push({ quality: 'MP3', url: candidate, kind: 'audio' });
+        if (candidate) {
+            const kind = mediaKind === 'audio' || /\\.(mp3|m4a|aac|ogg)(?:$|\\?)/i.test(candidate) ? 'audio' : 'video';
+            output.push({ quality: String(quality || (kind === 'audio' ? 'MP3' : 'Terbaik')), url: candidate, kind });
+        }
     }
 
     Object.entries(value).forEach(([key, nested]) => {
         if (nested && typeof nested === 'object') {
-            collectMediaCandidates(nested, output, depth + 1);
-        } else if (typeof nested === 'string' && /^(video|download|media|format|quality|result)/i.test(key)) {
-            const candidate = safeMediaUrl(nested);
-            if (candidate) output.push({ quality: String(quality || key), url: candidate, kind: 'video' });
+            const childKind = /audio|music|mp3/i.test(key) ? 'audio' : /video|quality|format|download|media/i.test(key) ? 'video' : mediaKind;
+            collectMediaCandidates(nested, output, depth + 1, childKind);
         }
     });
 
