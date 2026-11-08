@@ -115,10 +115,14 @@ module.exports = function (app) {
                 : null;
 
             if (!videos.length && !audio) throw new Error('Tautan video/audio tidak tersedia dari provider.');
+            const fallbackTitle = data.author?.nickname
+                ? 'Video TikTok - ' + data.author.nickname
+                : 'TikTok-' + (data.id || 'media');
+            const videoTitle = String(data.title || data.desc || '').trim() || fallbackTitle;
             return res.status(200).json({
                 status: true,
                 result: {
-                    title: String(data.title || data.desc || (data.author?.nickname ? 'Video TikTok - ' + data.author.nickname : 'TikTok-' + (data.id || 'media'))).trim(),
+                    title: videoTitle,
                     thumbnail: data.cover || data.origin_cover || null,
                     duration: data.duration || null,
                     video: videos,
