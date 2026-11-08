@@ -58,18 +58,28 @@ async function igdl(url) {
 
     let response;
     try {
-        response = await axios.get('https://freeapi.pro/api/alldl', {
-            params: { url },
-            timeout: 45000,
-            headers: {
-                Accept: 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36'
-            },
-            validateStatus: status => status >= 200 && status < 500
-        });
+        // Retry one time for transient connection failures (common with free providers).
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                response = await axios.get('https://freeapi.pro/api/alldl', {
+                    params: { url },
+                    timeout: 45000,
+                    headers: {
+                        Accept: 'application/json',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36'
+                    },
+                    validateStatus: status => status >= 200 && status < 500
+                });
+                break;
+            } catch (requestError) {
+                const retryable = ['ECONNABORTED', 'ETIMEDOUT', 'EAI_AGAIN', 'ECONNRESET', 'EHOSTUNREACH'].includes(requestError.code);
+                if (attempt === 0 && retryable && !requestError.response) continue;
+                throw requestError;
+            }
+        }
     } catch (error) {
         if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-            throw new Error('Provider Instagram melewati batas waktu. Silakan coba lagi.');
+            throw new Error('Provider Instagram melewati batas waktu setelah dicoba ulang. Silakan coba lagi.');
         }
         if (error.response) {
             throw new Error(`Provider Instagram mengalami HTTP ${error.response.status} saat menghubungi server.`);
@@ -120,9 +130,28 @@ async function igdl(url) {
         media = nested;
     }
     const candidates = collectMediaCandidates(media);
-    const unique = [...new Map(candidates.map(item => [item.url, item])).values()];
-    const audio = unique.find(item => item.kind === 'audio') || null;
-    const video = unique.filter(item => item.kind === 'video');
+    const video = candidates.filter(item => item.kind === 'video');
+    const audio = candidates.find(item => item.kind === 'audio') || null;
+
+    // Preserve the provider's actual quality variants instead of collapsing them
+    // into a single generic "Terbaik" option.
+    const explicitQualities = Array.isArray(media.qualities) ? media.qualities
+        : Array.isArray(media.qualityOptions) ? media.qualityOptions
+        : Array.isArray(media.quality_options) ? media.quality_options
+        : [];
+    for (const option of explicitQualities) {
+        if (!option || typeof option !== 'object') continue;
+        const mediaUrl = safeMediaUrl(option.url || option.videoUrl || option.video_url || option.downloadUrl);
+        if (!mediaUrl) continue;
+        const height = option.height || option.resolution;
+        const inferred = String(option.quality || option.label || height || '').trim() ||
+            (mediaUrl.match(/(?:^|[._-])(\d{3,4})p(?:[._-]|$)/i)?.[1] ? `${mediaUrl.match(/(?:^|[._-])(\d{3,4})p(?:[._-]|$)/i)[1]}p` : '');
+        video.push({ quality: inferred || 'Kualitas tersedia', url: mediaUrl });
+    }
+
+    const uniqueVideo = [...new Map(video.map(item => [item.url, item])).values()];
+    video.length = 0;
+    video.push(...uniqueVideo);
 
     // Support the documented AHM7 response and common alternate field names.
     const directVideo = safeMediaUrl(
@@ -130,6 +159,13 @@ async function igdl(url) {
         media.download || media.url || payload.videoUrl || payload.video_url || payload.url
     ) || safeMediaUrl(typeof media.video === 'object' ? (media.video.url || media.video.downloadUrl) : null);
     if (!video.length && directVideo) video.push({ quality: 'Terbaik', url: directVideo });
+    else if (directVideo && !video.some(item => item.url === directVideo)) {
+        video.unshift({ quality: 'Terbaik', url: directVideo });
+    }
+
+    // Sort numeric resolutions from highest to lowest; keep unknown labels afterward.
+    const resolutionOf = item => Number(String(item.quality).match(/(\d{3,4})\s*p/i)?.[1] || item.quality.match(/\b(\d{3,4})\b/)?.[1] || 0);
+    video.sort((a, b) => resolutionOf(b) - resolutionOf(a));
 
     const directAudio = safeMediaUrl(
         media.audioUrl || media.audio_url || media.musicUrl || media.music_url ||
