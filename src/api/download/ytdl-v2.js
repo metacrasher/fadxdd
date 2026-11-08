@@ -3,7 +3,7 @@ const { ytmp4 } = require('@vreden/youtube_scraper');
 function getYoutubeId(value) {
     try {
         const parsed = new URL(value);
-        const host = parsed.hostname.toLowerCase().replace(/^www\\./, '');
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
         if (!['youtube.com', 'm.youtube.com', 'youtu.be', 'youtube-nocookie.com'].includes(host) && !host.endsWith('.youtube.com')) return null;
         if (host === 'youtu.be') return parsed.pathname.split('/').filter(Boolean)[0] || null;
         return parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop() || null;
@@ -15,7 +15,7 @@ module.exports = function (app) {
         try {
             const url = String(req.query.url || '').trim();
             const id = getYoutubeId(url);
-            if (!id || !/^[\\w-]{11}$/.test(id)) return res.status(400).json({ status: false, message: 'Masukan link YouTube yang valid.' });
+            if (!id || !/^[\w-]{11}$/.test(id)) return res.status(400).json({ status: false, message: 'Masukan link YouTube yang valid.' });
 
             const allowed = [144, 360, 480, 720, 1080];
             const requested = Number.parseInt(req.query.quality || '360', 10);
@@ -26,7 +26,7 @@ module.exports = function (app) {
             }
 
             const filename = String(response.download.filename || (response.metadata?.title || 'youtube-video') + '.mp4')
-                .replace(/[\\r\\n"]/g, '').slice(0, 180);
+                .replace(/[\r\n"]/g, '').slice(0, 180);
             const downloadPath = '/download/youtube/file?url=' + encodeURIComponent(response.download.url) +
                 '&name=' + encodeURIComponent(filename) + '&format=mp4';
             return res.status(200).json({
