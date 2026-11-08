@@ -690,7 +690,8 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
     if (mode === 'video' || mode === 'audio') {
         const info = findMediaMetadata(data);
         // YouTube video preview is already shown above the form; avoid rendering it twice after processing.
-        const showResultThumbnail = item?.id !== 'youtube';
+        // Instagram MP3 results should show only the download action, without the green title/preview.
+        const showResultThumbnail = item?.id !== 'youtube' && !(item?.id === 'instagram' && mode === 'audio');
         if (showResultThumbnail && info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
