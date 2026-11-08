@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/api-page/styles.css">
   <script>
     document.addEventListener("wheel", event => { if (event.ctrlKey) event.preventDefault(); }, { passive: false });
     document.addEventListener("keydown", event => { if (event.ctrlKey && ["+", "-", "=", "0"].includes(event.key)) event.preventDefault(); });
@@ -36,7 +36,7 @@
     }, 18000);
   </script>
   <nav class="navbar"><div class="container nav-inner">
-    <a class="navbar-brand" href="#"><span class="brand-mark"><img src="/anime-avatar.svg" alt="Anime girl avatar"></span><span id="header">FADXD API</span><span id="versionHeader" class="version-chip"></span></a>
+    <a class="navbar-brand" href="#"><span class="brand-mark"><img src="/api-page/anime-avatar.svg" alt="Anime girl avatar"></span><span id="header">FADXD API</span><span id="versionHeader" class="version-chip"></span></a>
     <div class="nav-links"><a href="#home">HOME</a><a href="#api">API</a><a href="#api">TOOLS</a><a href="#about">ABOUT</a><a href="#about">CONTACT</a></div>
     <button id="profileMenuButton" class="profile-menu-button" type="button" aria-label="Open profile menu" aria-expanded="false" aria-controls="profileDrawer"><span></span><span></span><span></span></button>
   </div></nav>
@@ -44,7 +44,7 @@
   <aside id="profileDrawer" class="profile-drawer" aria-hidden="true" aria-label="Profile menu">
     <div class="drawer-header"><div class="drawer-label">PERSONAL PROFILE</div><button id="closeProfileDrawer" class="drawer-close" type="button" aria-label="Close profile menu">&times;</button></div>
     <div class="profile-content">
-      <div class="profile-avatar"><img src="/anime-avatar.svg" alt="FadXD anime avatar"><i></i></div><h2 class="profile-name">FadXD</h2><p class="profile-role">Developer & Creator</p>
+      <div class="profile-avatar"><img src="/api-page/anime-avatar.svg" alt="FadXD anime avatar"><i></i></div><h2 class="profile-name">FadXD</h2><p class="profile-role">Developer & Creator</p>
       <div class="profile-status"><span></span> AVAILABLE FOR CONNECTION</div><div class="drawer-divider"></div>
       <section class="about-section" id="about"><span class="drawer-section-label">ABOUT THIS WEBSITE</span><h3>Simple. Practical. Powerful.</h3><p>Website ini dibuat oleh <strong>Fad Store</strong> untuk menyediakan akses API yang simpel, praktis, dan mudah digunakan.</p></section>
       <div class="drawer-divider"></div><section class="social-section"><span class="drawer-section-label">CONNECT WITH ME</span>
@@ -62,7 +62,7 @@
         <div class="hero-actions"><a class="btn-primary-glow" href="#api">GET STARTED <span>↗</span></a><div id="apiLinks" class="hero-extra-links"></div></div>
         <div class="hero-stats"><div><strong>24/7</strong><small>SERVICE</small></div><i></i><div><strong>FAST</strong><small>RESPONSE</small></div><i></i><div><strong>V3</strong><small>PLATFORM</small></div></div>
       </div>
-      <div class="hero-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-glow"></div><img class="hero-anime" src="/anime-avatar.svg" alt=""></div>
+      <div class="hero-art" aria-hidden="true"><div class="art-ring ring-one"></div><div class="art-ring ring-two"></div><div class="art-glow"></div><img class="hero-anime" src="/api-page/anime-avatar.svg" alt=""></div>
       <div class="hero-version" id="version"></div>
     </section>
     <section class="api-section container" id="api">
@@ -77,5 +77,5 @@
     <div class="modal-body"><pre id="apiEndpoint"></pre><div id="apiQueryInputContainer"></div><div id="apiResponseLoading" class="d-none text-center my-4"><div class="spinner-border"></div><p class="mt-2 small">Processing request...</p></div><div id="apiResponseContent" class="d-none mt-3"></div></div>
     <div class="modal-footer"><button id="submitQueryBtn" class="btn btn-dark">Execute Request</button></div>
   </div></div></div>
-  <script async src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><script defer src="/script.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><script defer src="/api-page/script.js"></script>
 </body></html>
