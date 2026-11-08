@@ -719,10 +719,12 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
     if (item?.id === 'instagram') {
         const result = data?.result || {};
         const selectedMode = mode || 'video';
-        const heading = document.createElement('p');
-        heading.className = 'api-result-heading';
-        heading.textContent = result.title || 'Instagram media';
-        container.appendChild(heading);
+        if (selectedMode !== 'audio') {
+            const heading = document.createElement('p');
+            heading.className = 'api-result-heading';
+            heading.textContent = result.title || 'Instagram media';
+            container.appendChild(heading);
+        }
 
         if (selectedMode === 'audio') {
             if (!result.audio?.url) {
