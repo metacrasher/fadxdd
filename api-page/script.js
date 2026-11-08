@@ -466,6 +466,7 @@ function openApiModal(item) {
     let metadataRequestId = 0;
     let youtubePreviewGroup = null;
     const executeButton = document.getElementById('submitQueryBtn');
+    const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
 
     if (isYoutube) {
         if (executeButton) executeButton.disabled = true;
@@ -493,7 +494,6 @@ function openApiModal(item) {
         qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Resolusi video</label><select id="yt-quality" class="form-select"><option value="144">144p</option><option value="360" selected>360p (bawaan)</option><option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select><small id="yt-quality-status" class="form-text text-secondary">Masukkan link YouTube untuk memuat informasi video.</small>';
         inputContainer.appendChild(qualityGroup);
 
-        const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
         const modeSelect = document.getElementById('yt-mode');
         const loadYoutubeInfo = async () => {
             const value = urlInput?.value.trim() || '';
