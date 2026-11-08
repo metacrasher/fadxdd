@@ -390,7 +390,7 @@ function initSearch() {
 let activeApiItem = null;
 let apiModalInstance = null;
 let apiModalSession = 0;
-let youtubeDownloadInProgress = false;
+let mediaDownloadInProgress = false;
 
 function initApiModal() {
     const modalElement = document.getElementById('apiResponseModal');
@@ -677,7 +677,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
     if (mode === 'video' || mode === 'audio') {
         const info = findMediaMetadata(data);
         // YouTube video preview is already shown above the form; avoid rendering it twice after processing.
-        const showResultThumbnail = !(item?.id === 'youtube' && mode === 'video');
+        const showResultThumbnail = item?.id !== 'youtube';
         if (showResultThumbnail && info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
@@ -841,21 +841,24 @@ async function executeApiRequest() {
     if (!executeButton || !responseContent) return;
 
     const item = activeApiItem;
-    const isYoutubeDownload = item.id === 'youtube';
-    if (isYoutubeDownload && youtubeDownloadInProgress) {
+    const isMediaDownload = item.id === 'youtube' || item.id === 'tiktok';
+    if (isMediaDownload && mediaDownloadInProgress) {
         let notice = responseContent.querySelector('.youtube-download-wait-notice');
         if (!notice) {
             notice = document.createElement('p');
-            notice.className = 'youtube-download-wait-notice small text-warning';
+            notice.className = 'media-download-wait-notice small text-warning';
             notice.setAttribute('role', 'status');
             responseContent.appendChild(notice);
         }
-        notice.textContent = 'Unduhan sebelumnya masih berlangsung. Mohon tunggu hingga selesai sebelum memulai unduhan video atau musik berikutnya.';
+        notice.textContent = 'Permintaan unduhan sebelumnya masih diproses. Silakan tunggu hingga selesai sebelum memulai unduhan berikutnya.';
         responseContent.classList.remove('d-none');
         return;
     }
-    if (isYoutubeDownload) {
-        youtubeDownloadInProgress = true;
+    if (isMediaDownload) {
+        mediaDownloadInProgress = true;
+        executeButton.disabled = true;
+        executeButton.dataset.originalText = executeButton.textContent;
+        executeButton.textContent = 'Memproses unduhan...';
     }
 
     // Snapshot the selected service and form values so each click is an independent request.
@@ -874,8 +877,8 @@ async function executeApiRequest() {
     requestHeading.style.marginBottom = '.5rem';
     const requestLoading = document.createElement('p');
     requestLoading.className = 'small text-info';
-    requestLoading.textContent = isYoutubeDownload
-        ? 'Unduhan video atau musik sedang berlangsung. Mohon tunggu hingga proses ini selesai.'
+    requestLoading.textContent = isMediaDownload
+        ? 'Permintaan unduhan video atau musik sedang diproses. Mohon tunggu.'
         : 'Request sedang diproses...';
     const requestBody = document.createElement('div');
     requestCard.append(requestHeading, requestLoading, requestBody);
@@ -965,8 +968,11 @@ async function executeApiRequest() {
         }
         console.error('[FadXD API] Request error:', error);
     } finally {
-        if (isYoutubeDownload) {
-            youtubeDownloadInProgress = false;
+        if (isMediaDownload) {
+            mediaDownloadInProgress = false;
+            executeButton.disabled = false;
+            executeButton.textContent = executeButton.dataset.originalText || 'Execute Request';
+            delete executeButton.dataset.originalText;
         }
     }
 }
