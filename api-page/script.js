@@ -891,7 +891,7 @@ async function executeApiRequest() {
     requestLoading.className = 'small text-info';
     requestLoading.textContent = 'Request sedang diproses. Mohon tunggu hingga selesai.';
     const requestBody = document.createElement('div');
-    requestCard.append(requestHeading, requestLoading, requestBody);
+    requestCard.append(requestLoading, requestBody);
     responseContent.appendChild(requestCard);
     responseContent.classList.remove('d-none');
 
