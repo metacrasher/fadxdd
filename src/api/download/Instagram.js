@@ -288,9 +288,10 @@ async function igdl(url) {
         throw new Error('Provider merespons berhasil, tetapi tautan video/audio tidak ditemukan pada responsnya.');
     }
 
-    const pageMetadata = await getInstagramPageMetadata(url);
-    const title = media.title || media.caption || media.description || media.desc || media.text ||
-        payload.title || payload.caption || payload.description || pageMetadata.title || 'Instagram media';
+    const providerTitle = media.title || media.caption || media.description || media.desc || media.text ||
+        payload.title || payload.caption || payload.description;
+    const pageMetadata = providerTitle ? { title: '', owner: '' } : await getInstagramPageMetadata(url);
+    const title = providerTitle || pageMetadata.title || 'Instagram media';
     const thumbnail = safeMediaUrl(media.thumbnail || media.thumbnailUrl || media.thumbnail_url || payload.thumbnail);
 
     // Extract the account that published the post from common Instagram/provider
