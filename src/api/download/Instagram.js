@@ -1,28 +1,82 @@
 const axios = require('axios');
-const qs = require('qs');
-const cheerio = require('cheerio');
 
 function validInstagramUrl(value) {
     try {
-        const u = new URL(value);
-        return ['instagram.com', 'www.instagram.com', 'm.instagram.com'].includes(u.hostname) && /^\/(p|reel|reels|tv)\//.test(u.pathname);
-    } catch { return false; }
+        const url = new URL(value);
+        return ['instagram.com', 'www.instagram.com', 'm.instagram.com'].includes(url.hostname) &&
+            /^\/(p|reel|reels|tv)\//.test(url.pathname);
+    } catch {
+        return false;
+    }
+}
+
+function safeMediaUrl(value) {
+    try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+    } catch {
+        return null;
+    }
 }
 
 async function igdl(url) {
-    if (!validInstagramUrl(url)) throw new Error('Masukan link postingan atau Reels Instagram yang valid.');
-    const response = await axios.post('https://instanavigation.app/api/ajaxSearch', qs.stringify({ q: url, t: 'media', lang: 'en' }), {
-        timeout: 25000,
-        headers: { 'User-Agent': 'Mozilla/5.0 (Android 10; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0', Accept: 'application/json, text/javascript, */*; q=0.01', Referer: 'https://instanavigation.app/', 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest', Origin: 'https://instanavigation.app' }
-    });
-    const html = response.data?.data;
-    if (typeof html !== 'string' || !html.trim()) throw new Error('Provider Instagram tidak mengembalikan data media.');
-    const $ = cheerio.load(html);
-    const downloadUrls = $('.download-items__btn a').map((_, el) => $(el).attr('href')).get().filter(Boolean);
-    if (!downloadUrls.length) throw new Error('Media tidak ditemukan atau postingan tidak dapat diakses.');
-    let title = 'Instagram media';
-    try { title = new URLSearchParams(new URL(downloadUrls[0]).search).get('filename') || title; } catch {}
-    return { title: title.replace(/\.mp4$/i, ''), thumbnail: $('.download-items__thumb img').attr('src') || null, downloadUrls };
+    if (!validInstagramUrl(url)) {
+        throw new Error('Masukkan link postingan atau Reels Instagram publik yang valid.');
+    }
+
+    let response;
+    try {
+        response = await axios.get('https://ahm7xmakki.com/api/alldl', {
+            params: { url },
+            timeout: 35000,
+            headers: {
+                Accept: 'application/json',
+                'User-Agent': 'Mozilla/5.0 (compatible; FadXD/1.0)'
+            },
+            validateStatus: status => status >= 200 && status < 500
+        });
+    } catch (error) {
+        if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+            throw new Error('Provider Instagram melewati batas waktu. Silakan coba lagi.');
+        }
+        throw new Error('Provider Instagram tidak dapat dihubungi sementara.');
+    }
+
+    if (response.status === 429) {
+        throw new Error('Provider Instagram sedang membatasi permintaan. Coba lagi beberapa saat.');
+    }
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error(`Provider Instagram merespons HTTP ${response.status}.`);
+    }
+
+    const media = response.data?.mediaInfo;
+    if (response.data?.success !== true || !media || typeof media !== 'object') {
+        throw new Error(response.data?.message || 'Media tidak ditemukan atau postingan Instagram tidak dapat diakses.');
+    }
+
+    const qualities = Array.isArray(media.qualities)
+        ? media.qualities.map((item, index) => ({
+            quality: String(item?.quality || `Pilihan ${index + 1}`),
+            url: safeMediaUrl(item?.url)
+        })).filter(item => item.url)
+        : [];
+
+    const fallbackVideo = safeMediaUrl(media.videoUrl);
+    if (!qualities.length && fallbackVideo) {
+        qualities.push({ quality: 'Terbaik', url: fallbackVideo });
+    }
+
+    const audioUrl = safeMediaUrl(media.audioUrl);
+    if (!qualities.length && !audioUrl) {
+        throw new Error('Provider tidak menyediakan tautan video atau audio untuk postingan ini.');
+    }
+
+    return {
+        title: String(media.title || 'Instagram media').slice(0, 180),
+        thumbnail: safeMediaUrl(media.thumbnail),
+        video: qualities,
+        audio: audioUrl ? { quality: 'MP3', url: audioUrl } : null
+    };
 }
 
 module.exports = function (app) {
@@ -31,7 +85,10 @@ module.exports = function (app) {
             const result = await igdl(String(req.query.url || '').trim());
             return res.status(200).json({ status: true, result });
         } catch (error) {
-            return res.status(502).json({ status: false, message: error.message || 'Instagram provider sedang bermasalah.' });
+            return res.status(502).json({
+                status: false,
+                message: error.message || 'Provider Instagram sedang bermasalah.'
+            });
         }
     });
 };
