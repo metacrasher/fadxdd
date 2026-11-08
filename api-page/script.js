@@ -730,7 +730,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         if (selectedMode !== 'audio') {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
-            if (result.thumbnail && /^https?:\\/\\//i.test(result.thumbnail)) {
+            if (result.thumbnail && /^https?:\/\//i.test(result.thumbnail)) {
                 const image = document.createElement('img');
                 image.className = 'yt-video-thumbnail';
                 image.src = result.thumbnail;
