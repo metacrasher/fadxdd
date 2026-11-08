@@ -221,7 +221,12 @@ async function igdl(url) {
     );
     let audioResult = audio || (directAudio ? { quality: 'MP3', url: directAudio } : null);
 
-    // The primary provider often returns video only for Instagram. Try a\n    // separate audio endpoint before reporting that MP3 is unavailable.\n    if (!audioResult) {\n        const fallbackAudio = await getRetatubeInstagramAudio(url);\n        if (fallbackAudio) audioResult = { quality: 'MP3', url: fallbackAudio };\n    }
+    // The primary provider often returns video only for Instagram. Try a
+    // separate audio endpoint before reporting that MP3 is unavailable.
+    if (!audioResult) {
+        const fallbackAudio = await getRetatubeInstagramAudio(url);
+        if (fallbackAudio) audioResult = { quality: 'MP3', url: fallbackAudio };
+    }
 
     const success = payload.success === true || payload.status === true ||
         payload.ok === true || Boolean(video.length || audioResult);
