@@ -611,6 +611,21 @@ function renderApiResult(container, data, mode, quality) {
         container.prepend(note);
     }
 }
+function cleanApiErrorMessage(value) {
+    let message = String(value ?? '').trim();
+
+    // Hide HTTP status codes (for example 400, 404, 500, 504) from user-facing alerts.
+    message = message
+        .replace(/\\bHTTP\\s*[45]\\d{2}\\b\\s*:?[ \\t]*/gi, '')
+        .replace(/\\b[45]\\d{2}\\b\\s*:\\s*/g, '')
+        .replace(/\\s{2,}/g, ' ')
+        .trim();
+
+    // Avoid showing a bare technical error label when the code was the only detail.
+    message = message.replace(/^(?:error|eror)\\s*:?\\s*$/i, '');
+    return message || 'Terjadi gangguan pada server. Silakan coba lagi nanti.';
+}
+
 async function executeApiRequest() {
     if (!activeApiItem) return;
     const executeButton = document.getElementById('submitQueryBtn');
@@ -674,7 +689,7 @@ async function executeApiRequest() {
         responseContent.classList.remove('d-none');
         const message = document.createElement('p');
         message.className = 'api-error-message';
-        message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : error.message;
+        message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : cleanApiErrorMessage(error.message);
         responseContent.appendChild(message);
         // Missing/invalid user input and ordinary HTTP 4xx responses are not API outages.
         // Only server-side failures, throttling, timeouts, or network failures turn the indicator red.
