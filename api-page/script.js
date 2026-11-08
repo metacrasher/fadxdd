@@ -405,7 +405,6 @@ function openApiModal(item) {
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
         inputContainer.appendChild(modeGroup);
-        document.getElementById('yt-mode').addEventListener('change', () => {});
     }
     parameters.forEach((parameter, index) => {
         const group = document.createElement('div');
