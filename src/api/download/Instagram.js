@@ -19,6 +19,43 @@ function safeMediaUrl(value) {
     }
 }
 
+function collectMediaCandidates(value, output = [], depth = 0) {
+    if (!value || typeof value !== 'object' || depth > 6) return output;
+
+    if (Array.isArray(value)) {
+        value.forEach(item => collectMediaCandidates(item, output, depth + 1));
+        return output;
+    }
+
+    const videoKeys = ['url', 'videoUrl', 'video_url', 'downloadUrl', 'download_url', 'hd', 'sd', 'high', 'low', 'play'];
+    const audioKeys = ['audioUrl', 'audio_url', 'musicUrl', 'music_url', 'mp3', 'audio'];
+    const quality = value.quality || value.label || value.name || value.resolution || value.type;
+
+    for (const key of videoKeys) {
+        const candidate = safeMediaUrl(value[key]);
+        if (candidate && !/\.(mp3|m4a|aac|ogg)(?:$|\?)/i.test(candidate)) {
+            output.push({ quality: String(quality || 'Terbaik'), url: candidate, kind: 'video' });
+        }
+    }
+
+    for (const key of audioKeys) {
+        const raw = value[key];
+        const candidate = safeMediaUrl(typeof raw === 'string' ? raw : raw?.url || raw?.downloadUrl);
+        if (candidate) output.push({ quality: 'MP3', url: candidate, kind: 'audio' });
+    }
+
+    Object.entries(value).forEach(([key, nested]) => {
+        if (nested && typeof nested === 'object') {
+            collectMediaCandidates(nested, output, depth + 1);
+        } else if (typeof nested === 'string' && /^(video|download|media|format|quality|result)/i.test(key)) {
+            const candidate = safeMediaUrl(nested);
+            if (candidate) output.push({ quality: String(quality || key), url: candidate, kind: 'video' });
+        }
+    });
+
+    return output;
+}
+
 async function igdl(url) {
     if (!validInstagramUrl(url)) {
         throw new Error('Masukkan link postingan atau Reels Instagram publik yang valid.');
@@ -28,10 +65,10 @@ async function igdl(url) {
     try {
         response = await axios.get('https://ahm7xmakki.com/api/alldl', {
             params: { url },
-            timeout: 35000,
+            timeout: 45000,
             headers: {
                 Accept: 'application/json',
-                'User-Agent': 'Mozilla/5.0 (compatible; FadXD/1.0)'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36'
             },
             validateStatus: status => status >= 200 && status < 500
         });
@@ -49,33 +86,54 @@ async function igdl(url) {
         throw new Error(`Provider Instagram merespons HTTP ${response.status}.`);
     }
 
-    const media = response.data?.mediaInfo;
-    if (response.data?.success !== true || !media || typeof media !== 'object') {
-        throw new Error(response.data?.message || 'Media tidak ditemukan atau postingan Instagram tidak dapat diakses.');
+    const payload = response.data;
+    if (!payload || typeof payload !== 'object') {
+        throw new Error('Provider Instagram mengirim respons yang tidak dikenali. Coba lagi nanti.');
     }
 
-    const qualities = Array.isArray(media.qualities)
-        ? media.qualities.map((item, index) => ({
-            quality: String(item?.quality || `Pilihan ${index + 1}`),
-            url: safeMediaUrl(item?.url)
-        })).filter(item => item.url)
-        : [];
+    const media = payload.mediaInfo || payload.media || payload.result || payload.data || payload;
+    const candidates = collectMediaCandidates(media);
+    const unique = [...new Map(candidates.map(item => [item.url, item])).values()];
+    const audio = unique.find(item => item.kind === 'audio') || null;
+    const video = unique.filter(item => item.kind === 'video');
 
-    const fallbackVideo = safeMediaUrl(media.videoUrl);
-    if (!qualities.length && fallbackVideo) {
-        qualities.push({ quality: 'Terbaik', url: fallbackVideo });
+    // Support the documented AHM7 response and common alternate field names.
+    const directVideo = safeMediaUrl(
+        media.videoUrl || media.video_url || media.downloadUrl || media.download_url ||
+        media.url || payload.videoUrl || payload.video_url
+    );
+    if (!video.length && directVideo) video.push({ quality: 'Terbaik', url: directVideo });
+
+    const directAudio = safeMediaUrl(
+        media.audioUrl || media.audio_url || media.musicUrl || media.music_url ||
+        media.audio?.url || payload.audioUrl || payload.audio_url
+    );
+    const audioResult = audio || (directAudio ? { quality: 'MP3', url: directAudio } : null);
+
+    const success = payload.success === true || payload.status === true ||
+        payload.ok === true || Boolean(video.length || audioResult);
+    if (!success) {
+        const providerMessage = payload.message || payload.error?.message || payload.error;
+        throw new Error(typeof providerMessage === 'string' && providerMessage.length < 220
+            ? `Provider Instagram: ${providerMessage}`
+            : 'Provider gagal mengambil media Instagram. Kemungkinan format respons atau akses provider sedang berubah.');
     }
 
-    const audioUrl = safeMediaUrl(media.audioUrl);
-    if (!qualities.length && !audioUrl) {
-        throw new Error('Provider tidak menyediakan tautan video atau audio untuk postingan ini.');
+    if (!video.length && !audioResult) {
+        throw new Error('Provider merespons berhasil, tetapi tautan video/audio tidak ditemukan pada responsnya.');
     }
+
+    const title = media.title || media.caption || payload.title || 'Instagram media';
+    const thumbnail = safeMediaUrl(media.thumbnail || media.thumbnailUrl || media.thumbnail_url || payload.thumbnail);
 
     return {
-        title: String(media.title || 'Instagram media').slice(0, 180),
-        thumbnail: safeMediaUrl(media.thumbnail),
-        video: qualities,
-        audio: audioUrl ? { quality: 'MP3', url: audioUrl } : null
+        title: String(title).slice(0, 180),
+        thumbnail,
+        video: video.map((item, index) => ({
+            quality: String(item.quality || (index === 0 ? 'Terbaik' : `Pilihan ${index + 1}`)),
+            url: item.url
+        })),
+        audio: audioResult ? { quality: 'MP3', url: audioResult.url } : null
     };
 }
 
