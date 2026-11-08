@@ -1,4 +1,5 @@
 const axios = require('axios');
+const cheerio = require('cheerio');
 
 function validInstagramUrl(value) {
     try {
@@ -49,6 +50,41 @@ function collectMediaCandidates(value, output = [], depth = 0, mediaKind = 'vide
     });
 
     return output;
+}
+
+async function getRetatubeInstagramAudio(url) {
+    // Secondary source: Retatube exposes a separate audio download link in its
+    // result HTML. Keep this fallback isolated to Instagram MP3 handling.
+    try {
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36',
+            'HX-Request': 'true',
+            'Origin': 'https://retatube.com',
+            'Referer': 'https://retatube.com/'
+        };
+        const page = await axios.get('https://retatube.com/api/v1/aio/index?s=retatube.com', {
+            headers,
+            timeout: 25000
+        });
+        const $page = cheerio.load(page.data);
+        const prefix = $page('input[name="prefix"]').val();
+        if (!prefix) return null;
+
+        const result = await axios.post(
+            'https://retatube.com/api/v1/aio/search',
+            `prefix=${encodeURIComponent(prefix)}&vid=${encodeURIComponent(url)}`,
+            { headers, timeout: 35000 }
+        );
+        const $result = cheerio.load(result.data);
+        const audioLink = $result('#col-1098044499 a.custom_green_color').attr('href') ||
+            $result('#col-1098044499 a[href*="mp3"]').attr('href');
+        return safeMediaUrl(audioLink);
+    } catch {
+        // A fallback outage must not turn a working Instagram video download
+        // into an API failure.
+        return null;
+    }
 }
 
 async function igdl(url) {
@@ -183,7 +219,7 @@ async function igdl(url) {
         (typeof media.music === 'string' ? media.music : null) ||
         payload.audioUrl || payload.audio_url || payload.mp3Url || payload.mp3_url
     );
-    const audioResult = audio || (directAudio ? { quality: 'MP3', url: directAudio } : null);
+    let audioResult = audio || (directAudio ? { quality: 'MP3', url: directAudio } : null);\n\n    // The primary provider often returns video only for Instagram. Try a\n    // separate audio endpoint before reporting that MP3 is unavailable.\n    if (!audioResult) {\n        const fallbackAudio = await getRetatubeInstagramAudio(url);\n        if (fallbackAudio) audioResult = { quality: 'MP3', url: fallbackAudio };\n    }
 
     const success = payload.success === true || payload.status === true ||
         payload.ok === true || Boolean(video.length || audioResult);
