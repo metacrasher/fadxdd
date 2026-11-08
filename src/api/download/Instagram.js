@@ -99,7 +99,7 @@ async function igdl(url) {
             try {
                 response = await axios.get('https://freeapi.pro/api/alldl', {
                     params: { url },
-                    timeout: 15000,
+                    timeout: 45000,
                     headers: {
                         Accept: 'application/json',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36'
