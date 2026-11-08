@@ -809,9 +809,7 @@ function renderApiResult(container, data, mode, quality) {
             event.preventDefault();
         }
     });
-    // Generic success notices are intentionally shown only for the Status API.\n
-    // Generic "respons diterima" notices are intentionally omitted.
-    // The Status API keeps its normal raw response details above.
+    // The success acknowledgement is added by executeApiRequest only for Status API.
 }
 function cleanApiErrorMessage(value) {
     let message = String(value ?? '').trim();
