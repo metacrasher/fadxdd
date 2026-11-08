@@ -16,7 +16,7 @@ module.exports = function (app) {
         try { parsed = new URL(mediaUrl); } catch {
             return res.status(400).json({ status: false, message: 'Tautan file tidak valid.' });
         }
-        const allowedHost = /(^|\\.)(tiktokcdn\\.com|tiktokv\\.com|byteoversea\\.com|ibytedtos\\.com|tikwm\\.com|muscdn\\.com|tiktok\\.com)$/i;
+        const allowedHost = /(^|\.)(tiktokcdn\.com|tiktokv\.com|byteoversea\.com|ibytedtos\.com|tikwm\.com|muscdn\.com|tiktok\.com)$/i;
         if (parsed.protocol !== 'https:' || !allowedHost.test(parsed.hostname)) {
             return res.status(400).json({ status: false, message: 'Host file tidak diizinkan.' });
         }
