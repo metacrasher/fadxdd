@@ -59,10 +59,17 @@ module.exports = function (app) {
             // even when the URL points to TikTok's separate music stream.
             const isAudio = requestedFormat === 'mp3';
             const extension = isAudio ? 'mp3' : 'mp4';
-            const requestedName = String(req.query.name || 'tiktok-media').replace(/[^a-z0-9_-]/gi, '_').slice(0, 80) || 'tiktok-media';
+            const requestedName = String(req.query.name || 'tiktok-media')
+                .normalize('NFKC')
+                .replace(/[\\r\\n"]/g, '')
+                .replace(/[^\\p{L}\\p{N}._ -]/gu, '')
+                .replace(/\\s+/g, ' ')
+                .trim()
+                .slice(0, 80) || 'tiktok-media';
+            const asciiName = requestedName.replace(/[^a-z0-9._ -]/gi, '_').replace(/\\s+/g, '_') || 'tiktok-media';
             res.status(200);
             res.setHeader('Content-Type', isAudio ? 'audio/mpeg' : (contentType || 'video/mp4'));
-            res.setHeader('Content-Disposition', 'attachment; filename="' + requestedName + '.' + extension + '"');
+            res.setHeader('Content-Disposition', 'attachment; filename="' + asciiName + '.' + extension + '"; filename*=UTF-8\'\'' + encodeURIComponent(requestedName + '.' + extension));
             res.setHeader('X-Content-Type-Options', 'nosniff');
             if (media.headers['content-length']) res.setHeader('Content-Length', media.headers['content-length']);
             media.data.on('error', () => { if (!res.headersSent) res.status(502); res.end(); });
