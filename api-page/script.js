@@ -397,9 +397,10 @@ function openApiModal(item) {
     if (responseContent) { responseContent.textContent = ''; responseContent.classList.add('d-none'); }
 
     const isYoutube = item.id === 'youtube';
+    const isTikTok = item.id === 'tiktok';
     const parsedUrl = new URL(item.path, window.location.origin);
     const parameters = [...parsedUrl.searchParams.keys()];
-    if (isYoutube) {
+    if (isYoutube || isTikTok) {
         const modeGroup = document.createElement('div');
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
@@ -407,7 +408,7 @@ function openApiModal(item) {
         const qualityGroup = document.createElement('div');
         qualityGroup.className = 'mb-3 api-input-group';
         qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Kualitas video</label><select id="yt-quality" class="form-select"><option>144p</option><option>240p</option><option>360p</option><option>480p</option><option>720p</option><option>1080p</option><option>1440p</option><option>2160p</option><option value="best">Kualitas tertinggi tersedia</option></select>';
-        inputContainer.appendChild(qualityGroup);
+        if (isYoutube) inputContainer.appendChild(qualityGroup);
         document.getElementById('yt-mode').addEventListener('change', event => {
             qualityGroup.style.display = event.target.value === 'audio' ? 'none' : '';
         });
@@ -521,6 +522,40 @@ function renderApiResult(container, data, mode, quality) {
         }
     }
 
+    if (activeApiItem?.id === 'tiktok') {
+        const result = data?.result || {};
+        const selectedMode = mode || document.getElementById('yt-mode')?.value || 'video';
+        const options = selectedMode === 'audio'
+            ? (result.audio ? [{ quality: 'MP3', url: result.audio.url }] : [])
+            : (Array.isArray(result.video) ? result.video.map(v => ({ quality: v.quality || 'MP4', url: v.url })) : []);
+        if (result.thumbnail) {
+            const image = document.createElement('img');
+            image.className = 'yt-video-thumbnail';
+            image.src = result.thumbnail;
+            image.alt = 'Thumbnail TikTok';
+            container.appendChild(image);
+        }
+        const heading = document.createElement('p');
+        heading.className = 'api-result-heading';
+        heading.textContent = result.title || 'TikTok media';
+        container.appendChild(heading);
+        if (!options.length) {
+            const note = document.createElement('p');
+            note.className = 'small text-warning';
+            note.textContent = selectedMode === 'audio' ? 'Audio MP3 tidak tersedia untuk video ini.' : 'Video MP4 tidak tersedia.';
+            container.appendChild(note);
+        }
+        options.forEach(option => {
+            const anchor = document.createElement('a');
+            anchor.className = 'api-download-button';
+            anchor.href = option.url;
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            anchor.textContent = '⬇ Unduh ' + option.quality;
+            container.appendChild(anchor);
+        });
+        return;
+    }
     const links = collectDownloadLinks(data);
     const qualityRank = value => {
         const match = String(value).match(/(\d{3,4})\s*p/i);
@@ -607,12 +642,12 @@ async function executeApiRequest() {
 
         let mode = '';
         let quality = '';
-        if (item.id === 'youtube') {
+        if (item.id === 'youtube' || item.id === 'tiktok') {
             mode = document.getElementById('yt-mode')?.value || 'video';
             quality = document.getElementById('yt-quality')?.value || 'best';
             const videoUrl = url.searchParams.get('url');
             if (!videoUrl) throw new Error('Link YouTube wajib diisi.');
-            url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
+            if (item.id === 'youtube') url = new URL(mode === 'audio' ? '/download/ytmp3' : '/download/ytdl-v2', window.location.origin);
             url.searchParams.set('url', videoUrl);
         }
 
