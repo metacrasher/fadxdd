@@ -11,6 +11,36 @@ function validInstagramUrl(value) {
     }
 }
 
+async function getInstagramPageMetadata(url) {
+    try {
+        const response = await axios.get(url, {
+            timeout: 12000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36',
+                Accept: 'text/html,application/xhtml+xml'
+            },
+            maxRedirects: 5
+        });
+        const $ = cheerio.load(response.data);
+        const meta = selector => String($(selector).attr('content') || '').trim();
+        const title = meta('meta[property="og:title"]') || meta('meta[name="twitter:title"]') ||
+            String($('title').first().text() || '').trim();
+        const caption = meta('meta[property="og:description"]') || meta('meta[name="description"]') ||
+            meta('meta[name="twitter:description"]');
+        const ownerMatch = (title + ' ' + caption).match(/(?:^|[\s•])@?([a-zA-Z0-9._]{2,30})\\s+(?:on Instagram|di Instagram)/i);
+        return {
+            title: (caption || title || '').replace(/\\s+/g, ' ').trim().slice(0, 180),
+            owner: ownerMatch ? ownerMatch[1] : ''
+        };
+    } catch {
+        return { title: '', owner: '' };
+    }
+}
+
+function requestErrorIsClientError(error) {
+    return Boolean(error?.response && error.response.status >= 400 && error.response.status < 500 && error.response.status !== 429);
+}
+
 function safeMediaUrl(value) {
     try {
         const url = new URL(value);
@@ -104,12 +134,16 @@ async function igdl(url) {
                         Accept: 'application/json',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36'
                     },
-                    validateStatus: status => status >= 200 && status < 500
+                    validateStatus: status => status >= 200 && status < 300
                 });
                 break;
             } catch (requestError) {
-                const retryable = ['ECONNABORTED', 'ETIMEDOUT', 'EAI_AGAIN', 'ECONNRESET', 'EHOSTUNREACH'].includes(requestError.code);
-                if (attempt === 0 && retryable && !requestError.response) continue;
+                const retryableNetwork = ['ECONNABORTED', 'ETIMEDOUT', 'EAI_AGAIN', 'ECONNRESET', 'EHOSTUNREACH'].includes(requestError.code);
+                const retryableHttp = [429, 500, 502, 503, 504].includes(requestError.response?.status);
+                if (attempt === 0 && (retryableNetwork || retryableHttp)) {
+                    await new Promise(resolve => setTimeout(resolve, 1200));
+                    continue;
+                }
                 throw requestError;
             }
         }
@@ -117,7 +151,7 @@ async function igdl(url) {
         // If the primary provider cannot be reached, try the dedicated Instagram
         // audio resolver before returning a provider-connection error. This keeps
         // the MP3 path independent from the primary video resolver.
-        const fallbackAudio = await getRetatubeInstagramAudio(url);
+        const fallbackAudio = requestErrorIsClientError(error) ? null : await getRetatubeInstagramAudio(url);
         if (fallbackAudio) {
             return {
                 title: 'Instagram media',
@@ -254,7 +288,9 @@ async function igdl(url) {
         throw new Error('Provider merespons berhasil, tetapi tautan video/audio tidak ditemukan pada responsnya.');
     }
 
-    const title = media.title || media.caption || payload.title || 'Instagram media';
+    const pageMetadata = await getInstagramPageMetadata(url);
+    const title = media.title || media.caption || media.description || media.desc || media.text ||
+        payload.title || payload.caption || payload.description || pageMetadata.title || 'Instagram media';
     const thumbnail = safeMediaUrl(media.thumbnail || media.thumbnailUrl || media.thumbnail_url || payload.thumbnail);
 
     // Extract the account that published the post from common Instagram/provider
@@ -281,7 +317,7 @@ async function igdl(url) {
         }
         return '';
     };
-    const owner = findOwner(media) || findOwner(payload);
+    const owner = findOwner(media) || findOwner(payload) || pageMetadata.owner;
 
     return {
         title: String(title).slice(0, 180),
