@@ -246,7 +246,9 @@ function renderCategories(categories) {
             top.append(method, endpointName);
 
             const status = document.createElement('span');
-            const knownActive = ['tiktok', 'youtube', 'instagram'].includes(item.id);
+            const serviceId = String(item.id || '').trim().toLowerCase();
+            const serviceName = String(item.name || '').trim().toLowerCase();
+            const knownActive = ['tiktok', 'youtube'].includes(serviceId) || serviceId.includes('instagram') || serviceName.includes('instagram');
             status.className = 'api-health ' + (knownActive ? 'is-online' : 'is-unknown');
             status.innerHTML = '<i></i><span>' + (knownActive ? 'AKTIF' : 'Belum dicek') + '</span>';
             status.dataset.healthFor = item.id || item.name;
