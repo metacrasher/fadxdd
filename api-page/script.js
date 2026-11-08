@@ -389,6 +389,7 @@ function initSearch() {
 
 let activeApiItem = null;
 let apiModalInstance = null;
+let apiModalSession = 0;
 
 function initApiModal() {
     const modalElement = document.getElementById('apiResponseModal');
@@ -418,6 +419,7 @@ function initApiModal() {
 
 
 function openApiModal(item) {
+    apiModalSession++;
     activeApiItem = item;
     const title = document.getElementById('apiResponseModalLabel');
     const description = document.getElementById('apiResponseModalDesc');
@@ -669,12 +671,12 @@ function findMediaMetadata(data) {
     };
 }
 
-function renderApiResult(container, data, mode, quality) {
+function renderApiResult(container, data, mode, quality, item = activeApiItem) {
     container.innerHTML = '';
     if (mode === 'video' || mode === 'audio') {
         const info = findMediaMetadata(data);
         // YouTube video preview is already shown above the form; avoid rendering it twice after processing.
-        const showResultThumbnail = !(activeApiItem?.id === 'youtube' && mode === 'video');
+        const showResultThumbnail = !(item?.id === 'youtube' && mode === 'video');
         if (showResultThumbnail && info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
@@ -700,9 +702,9 @@ function renderApiResult(container, data, mode, quality) {
         }
     }
 
-    if (activeApiItem?.id === 'tiktok') {
+    if (item?.id === 'tiktok') {
         const result = data?.result || {};
-        const selectedMode = mode || document.getElementById('yt-mode')?.value || 'video';
+        const selectedMode = mode || 'video';
         const options = selectedMode === 'audio'
             ? (result.audio ? [{ quality: 'MP3', url: result.audio.url }] : [])
             : (Array.isArray(result.video) ? result.video.map(v => ({ quality: v.quality || 'MP4', url: v.url })) : []);
@@ -834,26 +836,38 @@ function cleanApiErrorMessage(value) {
 async function executeApiRequest() {
     if (!activeApiItem) return;
     const executeButton = document.getElementById('submitQueryBtn');
-    const loading = document.getElementById('apiResponseLoading');
     const responseContent = document.getElementById('apiResponseContent');
     if (!executeButton || !responseContent) return;
 
+    // Snapshot the selected service and form values so each click is an independent request.
     const item = activeApiItem;
-    const originalButtonText = executeButton.textContent;
-    executeButton.disabled = true;
-    executeButton.textContent = 'Memproses...';
-    if (loading) loading.classList.remove('d-none');
-    responseContent.classList.add('d-none');
-    responseContent.innerHTML = '';
+    const requestSession = apiModalSession;
+    const inputs = [...document.querySelectorAll('#apiQueryInputContainer .api-param-input')];
+    const inputValues = inputs.map(input => ({
+        parameter: input.dataset.parameter,
+        value: input.value.trim()
+    }));
+    const requestCard = document.createElement('section');
+    requestCard.className = 'api-request-result';
+    requestCard.style.cssText = 'margin-top:1rem;padding:1rem;border:1px solid rgba(0,220,255,.2);border-radius:12px;background:rgba(3,12,24,.55);';
+    const requestHeading = document.createElement('p');
+    requestHeading.className = 'api-result-heading';
+    requestHeading.textContent = item.name || 'API Request';
+    requestHeading.style.marginBottom = '.5rem';
+    const requestLoading = document.createElement('p');
+    requestLoading.className = 'small text-info';
+    requestLoading.textContent = 'Request sedang diproses...';
+    const requestBody = document.createElement('div');
+    requestCard.append(requestHeading, requestLoading, requestBody);
+    responseContent.appendChild(requestCard);
+    responseContent.classList.remove('d-none');
 
     let responseStatus = null;
     let serverFailure = false;
 
     try {
         let url = new URL(item.path, window.location.origin);
-        document.querySelectorAll('#apiQueryInputContainer .api-param-input').forEach(input => {
-            url.searchParams.set(input.dataset.parameter, input.value.trim());
-        });
+        inputValues.forEach(input => { url.searchParams.set(input.parameter, input.value); });
         [...url.searchParams.entries()].forEach(([key, value]) => { if (!value) url.searchParams.delete(key); });
 
         let mode = '';
@@ -883,8 +897,8 @@ async function executeApiRequest() {
             url.searchParams.set('url', videoUrl);
         }
 
-        for (const input of document.querySelectorAll('#apiQueryInputContainer .api-param-input')) {
-            if (!input.value.trim()) throw new Error(`Kolom ${input.dataset.parameter} wajib diisi.`);
+        for (const input of inputValues) {
+            if (!input.value) throw new Error(`Kolom ${input.parameter} wajib diisi.`);
         }
 
         const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(60000) });
@@ -896,7 +910,6 @@ async function executeApiRequest() {
         try { data = contentType.includes('json') || /^[\s]*[\[{]/.test(raw) ? JSON.parse(raw) : raw; }
         catch { data = raw; }
 
-        responseContent.classList.remove('d-none');
         if (!response.ok || data?.status === false) {
             // Client/input errors (4xx, except throttling) must not mark a healthy API red.
             // A 5xx/429 or an explicit provider/server failure is a technical failure.
@@ -904,20 +917,23 @@ async function executeApiRequest() {
                 (response.status >= 200 && response.status < 300 && data?.status === false);
             throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
         }
-        renderApiResult(responseContent, data, mode, quality);
+        if (requestSession !== apiModalSession) return;
+        requestLoading.remove();
+        renderApiResult(requestBody, data, mode, quality, item);
         if (item.id === 'status') {
             const accepted = document.createElement('div');
             accepted.className = 'api-response-accepted';
             accepted.innerHTML = '<span class="api-response-accepted-dot" aria-hidden="true"></span><span><strong>Respons diterima</strong><small>Status API berhasil merespons server.</small></span>';
-            responseContent.prepend(accepted);
+            requestBody.prepend(accepted);
         }
         setApiHealth(item.id || item.name, true);
     } catch (error) {
-        responseContent.classList.remove('d-none');
+        if (requestSession !== apiModalSession) return;
+        requestLoading.remove();
         const message = document.createElement('p');
         message.className = 'api-error-message';
         message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : cleanApiErrorMessage(error.message);
-        responseContent.appendChild(message);
+        requestBody.appendChild(message);
         // Missing/invalid user input and ordinary HTTP 4xx responses are not API outages.
         // Only server-side failures, throttling, timeouts, or network failures turn the indicator red.
         const isNetworkFailure = error instanceof TypeError || error.name === 'TimeoutError' ||
@@ -929,9 +945,8 @@ async function executeApiRequest() {
         }
         console.error('[FadXD API] Request error:', error);
     } finally {
-        if (loading) loading.classList.add('d-none');
-        executeButton.disabled = false;
-        executeButton.textContent = originalButtonText;
+        // Never lock the shared Execute button: another request can start immediately.
+        // Each request owns its own loading and result panel.
     }
 }
 
