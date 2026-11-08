@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 function getYoutubeId(value) {
     try {
         const parsed = new URL(value);
-        const host = parsed.hostname.toLowerCase().replace(/^www\\./, '');
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
         if (!['youtube.com', 'm.youtube.com', 'youtu.be', 'youtube-nocookie.com'].includes(host) && !host.endsWith('.youtube.com')) return null;
         if (host === 'youtu.be') return parsed.pathname.split('/').filter(Boolean)[0] || null;
         return parsed.searchParams.get('v') || parsed.pathname.split('/').filter(Boolean).pop() || null;
