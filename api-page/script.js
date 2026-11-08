@@ -592,7 +592,7 @@ function renderApiResult(container, data, mode, quality) {
             anchor.className = 'api-download-button';
             anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent((result.title || 'tiktok-media').slice(0, 80)) + (selectedMode === 'audio' ? '&format=mp3' : '&format=mp4');
             anchor.setAttribute('download', '');
-            anchor.textContent = '⬇ Unduh ' + option.quality;
+            anchor.textContent = selectedMode === 'audio' ? '⬇ Download' : '⬇ Unduh ' + option.quality;
             container.appendChild(anchor);
         });
         return;
@@ -640,7 +640,7 @@ function renderApiResult(container, data, mode, quality) {
             anchor.removeAttribute('target');
             anchor.removeAttribute('rel');
             anchor.setAttribute('download', '');
-            anchor.textContent = mode === 'audio' ? '⬇ Unduh Musik MP3' : `⬇ Unduh Video ${link.label || (index + 1)}`;
+            anchor.textContent = mode === 'audio' ? '⬇ Download' : `⬇ Download Video ${link.label || (index + 1)}`;
             container.appendChild(anchor);
         });
     }
