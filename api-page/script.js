@@ -691,7 +691,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         const info = findMediaMetadata(data);
         // YouTube video preview is already shown above the form; avoid rendering it twice after processing.
         // Instagram MP3 results should show only the download action, without the green title/preview.
-        const showResultThumbnail = item?.id !== 'youtube' && !(item?.id === 'instagram' && mode === 'audio');
+        const showResultThumbnail = item?.id !== 'youtube' && item?.id !== 'instagram';
         if (showResultThumbnail && info.thumbnail && (info.thumbnail.startsWith('https://') || info.thumbnail.startsWith('http://'))) {
             const preview = document.createElement('section');
             preview.className = 'yt-video-preview';
@@ -721,10 +721,27 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         const result = data?.result || {};
         const selectedMode = mode || 'video';
         if (selectedMode !== 'audio') {
-            const heading = document.createElement('p');
-            heading.className = 'api-result-heading';
-            heading.textContent = result.title || 'Instagram media';
-            container.appendChild(heading);
+            const preview = document.createElement('section');
+            preview.className = 'yt-video-preview';
+            if (result.thumbnail && /^https?:\\/\\//i.test(result.thumbnail)) {
+                const image = document.createElement('img');
+                image.className = 'yt-video-thumbnail';
+                image.src = result.thumbnail;
+                image.alt = 'Thumbnail video Instagram';
+                image.loading = 'lazy';
+                image.referrerPolicy = 'no-referrer';
+                preview.appendChild(image);
+            }
+            const info = document.createElement('div');
+            info.className = 'yt-video-info';
+            const title = document.createElement('h4');
+            title.textContent = result.title || 'Instagram media';
+            info.appendChild(title);
+            const meta = document.createElement('p');
+            meta.textContent = 'Video Instagram • MP4';
+            info.appendChild(meta);
+            preview.appendChild(info);
+            container.appendChild(preview);
         }
 
         if (selectedMode === 'audio') {
@@ -775,7 +792,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         const updateDownload = () => {
             const selected = qualities[Number(qualitySelect.value)] || qualities[0];
             downloadLink.href = selected.url;
-            downloadLink.textContent = '⬇ Download ' + (selected.quality || 'Video');
+            downloadLink.textContent = '⬇ Download di sini';
         };
         qualitySelect.addEventListener('change', updateDownload);
         updateDownload();
