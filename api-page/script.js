@@ -240,7 +240,7 @@ function renderCategories(categories) {
 
             const status = document.createElement('span');
             status.className = 'api-health is-unknown';
-            status.innerHTML = '<i></i><span>Belum dicek</span>';
+            status.innerHTML = `<i></i><span>${item.id === 'tiktok' ? 'Aktif' : 'Belum dicek'}</span>`;
             status.dataset.healthFor = item.id || item.name;
 
             const description = document.createElement('p');
