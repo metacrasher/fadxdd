@@ -497,6 +497,10 @@ function collectDownloadLinks(value, label = 'Download', output = [], seen = new
         return output;
     }
     if (typeof value === 'object') {
+        if (typeof value.url === 'string') {
+            collectDownloadLinks(value.url, value.quality || value.format || label, output, seen);
+            return output;
+        }
         Object.entries(value).forEach(([key, child]) => {
             const nextLabel = child && typeof child === 'object'
                 ? (child.quality || child.format || child.label || key)
@@ -702,7 +706,9 @@ async function executeApiRequest() {
         let quality = '';
         if (item.id === 'youtube' || item.id === 'tiktok') {
             mode = document.getElementById('yt-mode')?.value || 'video';
-            quality = 'best';
+            quality = item.id === 'youtube' && mode === 'video'
+                ? (document.getElementById('yt-quality')?.value || '360')
+                : 'best';
             const videoUrl = url.searchParams.get('url');
             if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : 'Masukan link TikTok yang valid.');
             if (item.id === 'youtube') {
