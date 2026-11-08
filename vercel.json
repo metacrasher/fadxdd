@@ -4,9 +4,24 @@
     {
       "src": "index.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api-page/**/*",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "src/settings.json",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "src/icon.png",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "handle": "filesystem"
+    },
     {
       "src": "/(.*)",
       "dest": "/index.js"
