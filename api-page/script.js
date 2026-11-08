@@ -239,8 +239,9 @@ function renderCategories(categories) {
             top.append(method, endpointName);
 
             const status = document.createElement('span');
-            status.className = 'api-health is-unknown';
-            status.innerHTML = '<i></i><span>Belum dicek</span>';
+            const knownActive = ['tiktok', 'youtube'].includes(item.id);
+            status.className = 'api-health ' + (knownActive ? 'is-online' : 'is-unknown');
+            status.innerHTML = '<i></i><span>' + (knownActive ? 'AKTIF' : 'Belum dicek') + '</span>';
             status.dataset.healthFor = item.id || item.name;
 
             const description = document.createElement('p');
@@ -464,8 +465,29 @@ function openApiModal(item) {
     let qualityGroup = null;
     let metadataTimer;
     let metadataRequestId = 0;
+    let youtubePreviewGroup = null;
+    const executeButton = document.getElementById('submitQueryBtn');
+    const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
 
     if (isYoutube) {
+        if (executeButton) executeButton.disabled = true;
+        youtubePreviewGroup = document.createElement('section');
+        youtubePreviewGroup.className = 'yt-video-preview d-none';
+        youtubePreviewGroup.id = 'yt-video-preview';
+        const previewImage = document.createElement('img');
+        previewImage.className = 'yt-video-thumbnail';
+        previewImage.alt = 'Thumbnail video YouTube';
+        previewImage.loading = 'lazy';
+        const previewInfo = document.createElement('div');
+        previewInfo.className = 'yt-video-info';
+        const previewTitle = document.createElement('h4');
+        previewTitle.id = 'yt-video-preview-title';
+        const previewMeta = document.createElement('p');
+        previewMeta.id = 'yt-video-preview-meta';
+        previewInfo.append(previewTitle, previewMeta);
+        youtubePreviewGroup.append(previewImage, previewInfo);
+        const urlGroup = urlInput?.closest('.api-input-group');
+        if (urlGroup?.parentNode) urlGroup.parentNode.insertBefore(youtubePreviewGroup, urlGroup.nextSibling);
         qualityGroup = document.createElement('div');
         qualityGroup.className = 'mb-3 api-input-group';
         qualityGroup.id = 'yt-quality-group';
@@ -473,7 +495,6 @@ function openApiModal(item) {
         qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Resolusi video</label><select id="yt-quality" class="form-select"><option value="144">144p</option><option value="360" selected>360p (bawaan)</option><option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select><small id="yt-quality-status" class="form-text text-secondary">Masukkan link YouTube untuk memuat informasi video.</small>';
         inputContainer.appendChild(qualityGroup);
 
-        const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
         const modeSelect = document.getElementById('yt-mode');
         const loadYoutubeInfo = async () => {
             const value = urlInput?.value.trim() || '';
@@ -481,6 +502,8 @@ function openApiModal(item) {
             clearTimeout(metadataTimer);
             if (!value) {
                 qualityGroup.style.display = 'none';
+                youtubePreviewGroup?.classList.add('d-none');
+                if (executeButton) executeButton.disabled = true;
                 return;
             }
             let parsed;
@@ -489,6 +512,8 @@ function openApiModal(item) {
                 if (!/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsed.hostname)) throw new Error('URL bukan YouTube');
             } catch {
                 qualityGroup.style.display = 'none';
+                youtubePreviewGroup?.classList.add('d-none');
+                if (executeButton) executeButton.disabled = true;
                 return;
             }
             if (modeSelect.value !== 'video') return;
@@ -503,12 +528,25 @@ function openApiModal(item) {
                 const data = await response.json();
                 if (requestId !== metadataRequestId) return;
                 if (!response.ok || data?.status !== true) throw new Error(data?.message || 'Informasi video tidak tersedia.');
-                if (status) status.textContent = 'Video: ' + (data.result?.title || 'YouTube') + ' • Resolusi yang dapat dicoba tersedia pada daftar di atas.';
+                const title = data.result?.title || 'Video YouTube';
+                const thumbnail = data.result?.thumbnail || '';
+                if (!thumbnail) throw new Error('Thumbnail video tidak tersedia.');
+                const image = youtubePreviewGroup?.querySelector('img');
+                if (image) image.src = thumbnail;
+                const previewTitle = document.getElementById('yt-video-preview-title');
+                if (previewTitle) previewTitle.textContent = title;
+                const previewMeta = document.getElementById('yt-video-preview-meta');
+                if (previewMeta) previewMeta.textContent = 'Preview siap • Pilih resolusi, lalu tekan tombol proses untuk mengunduh.';
+                youtubePreviewGroup?.classList.remove('d-none');
+                if (status) status.textContent = 'Preview video berhasil dimuat.';
+                if (executeButton) executeButton.disabled = false;
                 const quality = document.getElementById('yt-quality');
                 if (quality && data.result?.recommendedQuality) quality.value = String(data.result.recommendedQuality);
             } catch (error) {
                 if (requestId !== metadataRequestId) return;
-                if (status) status.textContent = 'Info video belum terbaca; Anda tetap dapat memilih resolusi dan mencoba unduh.';
+                youtubePreviewGroup?.classList.add('d-none');
+                if (executeButton) executeButton.disabled = true;
+                if (status) status.textContent = 'Preview belum tersedia. Periksa link YouTube dan coba lagi.';
             }
         };
         urlInput?.addEventListener('input', () => {
@@ -535,6 +573,8 @@ function openApiModal(item) {
                 metadataRequestId++;
                 clearTimeout(metadataTimer);
                 if (qualityGroup) qualityGroup.style.display = 'none';
+                youtubePreviewGroup?.classList.add('d-none');
+                if (executeButton) executeButton.disabled = modeSelect.value === 'video';
                 const status = document.getElementById('yt-quality-status');
                 if (status) status.textContent = 'Masukkan link YouTube untuk memuat informasi video.';
             }
@@ -734,12 +774,8 @@ function renderApiResult(container, data, mode, quality) {
     pre.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
     details.append(summary, pre);
     container.appendChild(details);
-    if (!links.length) {
-        const note = document.createElement('p');
-        note.className = 'small text-warning mt-2';
-        note.textContent = 'Respons diterima, tetapi API tidak mengembalikan tautan unduhan yang dikenali.';
-        container.prepend(note);
-    }
+    // Generic "respons diterima" notices are intentionally omitted.
+    // The Status API keeps its normal raw response details above.
 }
 function cleanApiErrorMessage(value) {
     let message = String(value ?? '').trim();
@@ -820,13 +856,6 @@ async function executeApiRequest() {
             throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
         }
         renderApiResult(responseContent, data, mode, quality);
-        if (item.id === 'youtube' && mode === 'video') {
-            const downloadButton = responseContent.querySelector('.api-download-button');
-            if (downloadButton) {
-                // The server returns a same-origin streaming URL; start the file download after processing.
-                downloadButton.click();
-            }
-        }
         setApiHealth(item.id || item.name, true);
     } catch (error) {
         responseContent.classList.remove('d-none');
@@ -865,4 +894,6 @@ function resetApiModal() {
         responseContent.classList.add('d-none');
         responseContent.textContent = '';
     }
+    const executeButton = document.getElementById('submitQueryBtn');
+    if (executeButton) executeButton.disabled = false;
 }
