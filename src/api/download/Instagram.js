@@ -65,7 +65,7 @@ async function getRetatubeInstagramAudio(url) {
         };
         const page = await axios.get('https://retatube.com/api/v1/aio/index?s=retatube.com', {
             headers,
-            timeout: 25000
+            timeout: 10000
         });
         const $page = cheerio.load(page.data);
         const prefix = $page('input[name="prefix"]').val();
@@ -74,7 +74,7 @@ async function getRetatubeInstagramAudio(url) {
         const result = await axios.post(
             'https://retatube.com/api/v1/aio/search',
             `prefix=${encodeURIComponent(prefix)}&vid=${encodeURIComponent(url)}`,
-            { headers, timeout: 35000 }
+            { headers, timeout: 12000 }
         );
         const $result = cheerio.load(result.data);
         const audioLink = $result('#col-1098044499 a.custom_green_color').attr('href') ||
@@ -99,7 +99,7 @@ async function igdl(url) {
             try {
                 response = await axios.get('https://freeapi.pro/api/alldl', {
                     params: { url },
-                    timeout: 45000,
+                    timeout: 15000,
                     headers: {
                         Accept: 'application/json',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36'
@@ -114,8 +114,21 @@ async function igdl(url) {
             }
         }
     } catch (error) {
+        // If the primary provider cannot be reached, try the dedicated Instagram
+        // audio resolver before returning a provider-connection error. This keeps
+        // the MP3 path independent from the primary video resolver.
+        const fallbackAudio = await getRetatubeInstagramAudio(url);
+        if (fallbackAudio) {
+            return {
+                title: 'Instagram media',
+                thumbnail: null,
+                video: [],
+                audio: { quality: 'MP3', url: fallbackAudio }
+            };
+        }
+
         if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-            throw new Error('Provider Instagram melewati batas waktu setelah dicoba ulang. Silakan coba lagi.');
+            throw new Error('Provider Instagram dan server cadangan melewati batas waktu. Silakan coba lagi.');
         }
         if (error.response) {
             throw new Error(`Provider Instagram mengalami HTTP ${error.response.status} saat menghubungi server.`);
