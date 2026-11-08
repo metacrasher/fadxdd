@@ -742,7 +742,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
             const info = document.createElement('div');
             info.className = 'yt-video-info';
             const title = document.createElement('h4');
-            title.textContent = result.title || 'Instagram media';
+            title.textContent = result.title || result.caption || result.description || result.desc || data?.title || data?.caption || 'Instagram media';
             info.appendChild(title);
             const owner = result.owner || result.username || result.author || '';
             const meta = document.createElement('p');
