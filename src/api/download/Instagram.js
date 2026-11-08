@@ -58,7 +58,7 @@ async function igdl(url) {
 
     let response;
     try {
-        response = await axios.get('https://ahm7xmakki.com/api/alldl', {
+        response = await axios.get('https://freeapi.pro/api/alldl', {
             params: { url },
             timeout: 45000,
             headers: {
