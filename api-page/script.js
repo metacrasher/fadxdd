@@ -390,7 +390,7 @@ function initSearch() {
 let activeApiItem = null;
 let apiModalInstance = null;
 let apiModalSession = 0;
-let mediaDownloadInProgress = false;
+let apiRequestInProgress = false;
 
 function initApiModal() {
     const modalElement = document.getElementById('apiResponseModal');
@@ -841,24 +841,23 @@ async function executeApiRequest() {
     if (!executeButton || !responseContent) return;
 
     const item = activeApiItem;
-    const isMediaDownload = item.id === 'youtube' || item.id === 'tiktok';
-    if (isMediaDownload && mediaDownloadInProgress) {
+    if (apiRequestInProgress) {
         let notice = responseContent.querySelector('.youtube-download-wait-notice');
         if (!notice) {
             notice = document.createElement('p');
-            notice.className = 'media-download-wait-notice small text-warning';
+            notice.className = 'api-request-wait-notice small text-warning';
             notice.setAttribute('role', 'status');
             responseContent.appendChild(notice);
         }
-        notice.textContent = 'Permintaan unduhan sebelumnya masih diproses. Silakan tunggu hingga selesai sebelum memulai unduhan berikutnya.';
+        notice.textContent = 'Permintaan sebelumnya masih diproses. Tunggu hingga selesai sebelum menjalankan API berikutnya.';
         responseContent.classList.remove('d-none');
         return;
     }
-    if (isMediaDownload) {
-        mediaDownloadInProgress = true;
+    {
+        apiRequestInProgress = true;
         executeButton.disabled = true;
         executeButton.dataset.originalText = executeButton.textContent;
-        executeButton.textContent = 'Memproses unduhan...';
+        executeButton.textContent = 'Memproses request...';
     }
 
     // Snapshot the selected service and form values so each click is an independent request.
@@ -877,9 +876,7 @@ async function executeApiRequest() {
     requestHeading.style.marginBottom = '.5rem';
     const requestLoading = document.createElement('p');
     requestLoading.className = 'small text-info';
-    requestLoading.textContent = isMediaDownload
-        ? 'Permintaan unduhan video atau musik sedang diproses. Mohon tunggu.'
-        : 'Request sedang diproses...';
+    requestLoading.textContent = 'Request sedang diproses. Mohon tunggu hingga selesai.';
     const requestBody = document.createElement('div');
     requestCard.append(requestHeading, requestLoading, requestBody);
     responseContent.appendChild(requestCard);
@@ -968,8 +965,8 @@ async function executeApiRequest() {
         }
         console.error('[FadXD API] Request error:', error);
     } finally {
-        if (isMediaDownload) {
-            mediaDownloadInProgress = false;
+        {
+            apiRequestInProgress = false;
             executeButton.disabled = false;
             executeButton.textContent = executeButton.dataset.originalText || 'Execute Request';
             delete executeButton.dataset.originalText;
