@@ -239,8 +239,9 @@ function renderCategories(categories) {
             top.append(method, endpointName);
 
             const status = document.createElement('span');
-            status.className = 'api-health is-unknown';
-            status.innerHTML = '<i></i><span>Belum dicek</span>';
+            const knownActive = ['tiktok', 'youtube'].includes(item.id);
+            status.className = 'api-health ' + (knownActive ? 'is-online' : 'is-unknown');
+            status.innerHTML = '<i></i><span>' + (knownActive ? 'AKTIF' : 'Belum dicek') + '</span>';
             status.dataset.healthFor = item.id || item.name;
 
             const description = document.createElement('p');
