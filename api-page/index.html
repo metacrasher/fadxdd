@@ -22,6 +22,19 @@
 </head>
 <body>
   <div id="loadingScreen"><div class="loader-core"></div><p>INITIALIZING FADXD SYSTEM</p></div>
+  <script>
+    // Safety net: never leave the page covered forever if the main script fails to load.
+    window.setTimeout(() => {
+      const screen = document.getElementById('loadingScreen');
+      if (!screen || screen.classList.contains('loaded')) return;
+      screen.classList.add('loaded');
+      const content = document.getElementById('apiContent');
+      if (content && !content.children.length) {
+        content.innerHTML = '<div class="alert alert-danger"><strong>INITIALIZATION TIMEOUT</strong><p class="mb-0 mt-2">Sistem belum berhasil dimuat. Muat ulang halaman beberapa saat lagi.</p></div>';
+      }
+      window.setTimeout(() => { screen.style.display = 'none'; }, 350);
+    }, 18000);
+  </script>
   <nav class="navbar"><div class="container nav-inner">
     <a class="navbar-brand" href="#"><span class="brand-mark"><img src="/anime-avatar.svg" alt="Anime girl avatar"></span><span id="header">FADXD API</span><span id="versionHeader" class="version-chip"></span></a>
     <div class="nav-links"><a href="#home">HOME</a><a href="#api">API</a><a href="#api">TOOLS</a><a href="#about">ABOUT</a><a href="#about">CONTACT</a></div>
