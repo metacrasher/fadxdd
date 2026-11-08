@@ -164,12 +164,19 @@ async function igdl(url) {
     }
 
     // Sort numeric resolutions from highest to lowest; keep unknown labels afterward.
-    const resolutionOf = item => Number(String(item.quality).match(/(\d{3,4})\s*p/i)?.[1] || item.quality.match(/\b(\d{3,4})\b/)?.[1] || 0);
+    const resolutionOf = item => {
+        const label = String(item.quality || '');
+        return Number(label.match(/(\d{3,4})\s*p/i)?.[1] || label.match(/\b(\d{3,4})\b/)?.[1] || 0);
+    };
     video.sort((a, b) => resolutionOf(b) - resolutionOf(a));
 
     const directAudio = safeMediaUrl(
         media.audioUrl || media.audio_url || media.musicUrl || media.music_url ||
-        media.audio?.url || media.music?.url || payload.audioUrl || payload.audio_url
+        media.audio?.url || media.audio?.downloadUrl || media.music?.url || media.music?.downloadUrl ||
+        media.mp3Url || media.mp3_url || media.audioDownloadUrl || media.audio_download_url ||
+        (typeof media.audio === 'string' ? media.audio : null) ||
+        (typeof media.music === 'string' ? media.music : null) ||
+        payload.audioUrl || payload.audio_url || payload.mp3Url || payload.mp3_url
     );
     const audioResult = audio || (directAudio ? { quality: 'MP3', url: directAudio } : null);
 
