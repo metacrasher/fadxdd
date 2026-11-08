@@ -441,16 +441,8 @@ function openApiModal(item) {
         modeGroup.className = 'mb-3 api-input-group';
         modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
         inputContainer.appendChild(modeGroup);
-        if (isYoutube) {
-            const qualityGroup = document.createElement('div');
-            qualityGroup.className = 'mb-3 api-input-group';
-            qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Resolusi video</label><select id="yt-quality" class="form-select"><option value="144">144p</option><option value="360" selected>360p</option><option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select>';
-            inputContainer.appendChild(qualityGroup);
-            document.getElementById('yt-mode').addEventListener('change', event => {
-                qualityGroup.style.display = event.target.value === 'video' ? '' : 'none';
-            });
-        }
     }
+
     parameters.forEach((parameter, index) => {
         const group = document.createElement('div');
         group.className = 'mb-3 api-input-group';
@@ -468,6 +460,65 @@ function openApiModal(item) {
         group.append(label, input);
         inputContainer.appendChild(group);
     });
+
+    if (isYoutube) {
+        const qualityGroup = document.createElement('div');
+        qualityGroup.className = 'mb-3 api-input-group';
+        qualityGroup.id = 'yt-quality-group';
+        qualityGroup.style.display = 'none';
+        qualityGroup.innerHTML = '<label class="form-label" for="yt-quality">Resolusi video</label><select id="yt-quality" class="form-select"><option value="144">144p</option><option value="360" selected>360p (bawaan)</option><option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select><small id="yt-quality-status" class="form-text text-secondary">Masukkan link YouTube untuk memuat informasi video.</small>';
+        inputContainer.appendChild(qualityGroup);
+
+        const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
+        const modeSelect = document.getElementById('yt-mode');
+        let metadataTimer;
+        let metadataRequestId = 0;
+        const loadYoutubeInfo = async () => {
+            const value = urlInput?.value.trim() || '';
+            const requestId = ++metadataRequestId;
+            clearTimeout(metadataTimer);
+            if (!value) {
+                qualityGroup.style.display = 'none';
+                return;
+            }
+            let parsed;
+            try {
+                parsed = new URL(value);
+                if (!/(^|\.)((youtube\.com)|(youtu\.be))$/i.test(parsed.hostname)) throw new Error('URL bukan YouTube');
+            } catch {
+                qualityGroup.style.display = 'none';
+                return;
+            }
+            if (modeSelect.value !== 'video') return;
+            qualityGroup.style.display = '';
+            const status = document.getElementById('yt-quality-status');
+            if (status) status.textContent = 'Memeriksa video YouTube...';
+            try {
+                const response = await fetch('/download/youtube/info?url=' + encodeURIComponent(value), {
+                    headers: { Accept: 'application/json' },
+                    signal: AbortSignal.timeout(20000)
+                });
+                const data = await response.json();
+                if (requestId !== metadataRequestId) return;
+                if (!response.ok || data?.status !== true) throw new Error(data?.message || 'Informasi video tidak tersedia.');
+                if (status) status.textContent = 'Video: ' + (data.result?.title || 'YouTube') + ' • Resolusi yang dapat dicoba tersedia pada daftar di atas.';
+                const quality = document.getElementById('yt-quality');
+                if (quality && data.result?.recommendedQuality) quality.value = String(data.result.recommendedQuality);
+            } catch (error) {
+                if (requestId !== metadataRequestId) return;
+                if (status) status.textContent = 'Info video belum terbaca; Anda tetap dapat memilih resolusi dan mencoba unduh.';
+            }
+        };
+        urlInput?.addEventListener('input', () => {
+            clearTimeout(metadataTimer);
+            metadataTimer = setTimeout(loadYoutubeInfo, 650);
+        });
+        urlInput?.addEventListener('change', loadYoutubeInfo);
+        modeSelect.addEventListener('change', () => {
+            qualityGroup.style.display = modeSelect.value === 'video' && !!urlInput?.value.trim() ? '' : 'none';
+        });
+    }
+
     if (parameters.length === 0) {
         const note = document.createElement('p');
         note.className = 'small text-secondary';
@@ -741,6 +792,13 @@ async function executeApiRequest() {
             throw new Error(`HTTP ${response.status}: ${typeof data === 'string' ? data : (data?.message || data?.error || JSON.stringify(data))}`);
         }
         renderApiResult(responseContent, data, mode, quality);
+        if (item.id === 'youtube' && mode === 'video') {
+            const downloadButton = responseContent.querySelector('.api-download-button');
+            if (downloadButton) {
+                // The server returns a same-origin streaming URL; start the file download after processing.
+                downloadButton.click();
+            }
+        }
         setApiHealth(item.id || item.name, true);
     } catch (error) {
         responseContent.classList.remove('d-none');
