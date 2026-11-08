@@ -8,6 +8,40 @@ function validTikTokUrl(value) {
 }
 
 module.exports = function (app) {
+    // Proxy only media URLs returned by trusted TikTok/TikWM CDN hosts so the
+    // browser receives an attachment from this same origin (one-click download).
+    app.get('/download/tiktok/file', async (req, res) => {
+        const mediaUrl = String(req.query.url || '').trim();
+        let parsed;
+        try { parsed = new URL(mediaUrl); } catch {
+            return res.status(400).json({ status: false, message: 'Tautan file tidak valid.' });
+        }
+        const allowedHost = /(^|\\.)(tiktokcdn\\.com|tiktokv\\.com|byteoversea\\.com|ibytedtos\\.com|tikwm\\.com|muscdn\\.com|tiktok\\.com)$/i;
+        if (parsed.protocol !== 'https:' || !allowedHost.test(parsed.hostname)) {
+            return res.status(400).json({ status: false, message: 'Host file tidak diizinkan.' });
+        }
+        try {
+            const media = await axios.get(parsed.href, {
+                responseType: 'stream',
+                timeout: 60000,
+                maxRedirects: 0,
+                maxContentLength: 100 * 1024 * 1024,
+                headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://www.tiktok.com/' }
+            });
+            const contentType = String(media.headers['content-type'] || 'application/octet-stream').split(';')[0];
+            const extension = contentType.includes('audio') ? 'mp3' : 'mp4';
+            const requestedName = String(req.query.name || 'tiktok-media').replace(/[^a-z0-9_-]/gi, '_').slice(0, 80) || 'tiktok-media';
+            res.status(200);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', 'attachment; filename="' + requestedName + '.' + extension + '"');
+            if (media.headers['content-length']) res.setHeader('Content-Length', media.headers['content-length']);
+            media.data.on('error', () => { if (!res.headersSent) res.status(502); res.end(); });
+            return media.data.pipe(res);
+        } catch (error) {
+            return res.status(502).json({ status: false, message: 'Gagal mengambil file dari CDN TikTok.' });
+        }
+    });
+
     app.get('/download/tiktok', async (req, res) => {
         try {
             const url = String(req.query.url || '').trim();
