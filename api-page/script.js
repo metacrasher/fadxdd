@@ -390,6 +390,7 @@ function initSearch() {
 let activeApiItem = null;
 let apiModalInstance = null;
 let apiModalSession = 0;
+let youtubeDownloadInProgress = false;
 
 function initApiModal() {
     const modalElement = document.getElementById('apiResponseModal');
@@ -839,8 +840,25 @@ async function executeApiRequest() {
     const responseContent = document.getElementById('apiResponseContent');
     if (!executeButton || !responseContent) return;
 
-    // Snapshot the selected service and form values so each click is an independent request.
     const item = activeApiItem;
+    const isYoutubeDownload = item.id === 'youtube';
+    if (isYoutubeDownload && youtubeDownloadInProgress) {
+        let notice = responseContent.querySelector('.youtube-download-wait-notice');
+        if (!notice) {
+            notice = document.createElement('p');
+            notice.className = 'youtube-download-wait-notice small text-warning';
+            notice.setAttribute('role', 'status');
+            responseContent.appendChild(notice);
+        }
+        notice.textContent = 'Unduhan sebelumnya masih berlangsung. Mohon tunggu hingga selesai sebelum memulai unduhan video atau musik berikutnya.';
+        responseContent.classList.remove('d-none');
+        return;
+    }
+    if (isYoutubeDownload) {
+        youtubeDownloadInProgress = true;
+    }
+
+    // Snapshot the selected service and form values so each click is an independent request.
     const requestSession = apiModalSession;
     const inputs = [...document.querySelectorAll('#apiQueryInputContainer .api-param-input')];
     const inputValues = inputs.map(input => ({
@@ -856,7 +874,9 @@ async function executeApiRequest() {
     requestHeading.style.marginBottom = '.5rem';
     const requestLoading = document.createElement('p');
     requestLoading.className = 'small text-info';
-    requestLoading.textContent = 'Request sedang diproses...';
+    requestLoading.textContent = isYoutubeDownload
+        ? 'Unduhan video atau musik sedang berlangsung. Mohon tunggu hingga proses ini selesai.'
+        : 'Request sedang diproses...';
     const requestBody = document.createElement('div');
     requestCard.append(requestHeading, requestLoading, requestBody);
     responseContent.appendChild(requestCard);
@@ -945,8 +965,9 @@ async function executeApiRequest() {
         }
         console.error('[FadXD API] Request error:', error);
     } finally {
-        // Never lock the shared Execute button: another request can start immediately.
-        // Each request owns its own loading and result panel.
+        if (isYoutubeDownload) {
+            youtubeDownloadInProgress = false;
+        }
     }
 }
 
