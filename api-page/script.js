@@ -589,7 +589,7 @@ function openApiModal(item) {
 
     // Every downloader with a format selector starts fresh after a format switch.
     // This resets only the form/result UI; API request and download logic stay unchanged.
-    if (isYoutube || isTikTok) {
+    if (isYoutube || isTikTok || isInstagram) {
         const modeSelect = document.getElementById('yt-mode');
         const urlInput = inputContainer.querySelector('.api-param-input[data-parameter="url"]');
         modeSelect?.addEventListener('change', () => {
@@ -597,7 +597,7 @@ function openApiModal(item) {
                 urlInput.value = '';
                 urlInput.placeholder = isYoutube
                     ? 'Masukkan link YouTube lagi untuk format ini'
-                    : 'Masukkan link TikTok lagi untuk format ini';
+                    : isInstagram ? 'Masukkan link Instagram lagi untuk format ini' : 'Masukkan link TikTok lagi untuk format ini';
             }
             if (isYoutube) {
                 metadataRequestId++;
