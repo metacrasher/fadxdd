@@ -887,10 +887,6 @@ async function executeApiRequest() {
     const requestCard = document.createElement('section');
     requestCard.className = 'api-request-result';
     requestCard.style.cssText = 'margin-top:1rem;padding:1rem;border:1px solid rgba(0,220,255,.2);border-radius:12px;background:rgba(3,12,24,.55);';
-    const requestHeading = document.createElement('p');
-    requestHeading.className = 'api-result-heading';
-    requestHeading.textContent = item.name || 'API Request';
-    requestHeading.style.marginBottom = '.5rem';
     const requestLoading = document.createElement('p');
     requestLoading.className = 'small text-info';
     requestLoading.textContent = 'Request sedang diproses. Mohon tunggu hingga selesai.';
