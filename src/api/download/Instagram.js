@@ -5,7 +5,7 @@ const cheerio = require('cheerio');
 function validInstagramUrl(value) {
     try {
         const u = new URL(value);
-        return ['instagram.com', 'www.instagram.com', 'm.instagram.com'].includes(u.hostname) && /^\\/(p|reel|reels|tv)\\//.test(u.pathname);
+        return ['instagram.com', 'www.instagram.com', 'm.instagram.com'].includes(u.hostname) && /^\/(p|reel|reels|tv)\//.test(u.pathname);
     } catch { return false; }
 }
 
@@ -22,7 +22,7 @@ async function igdl(url) {
     if (!downloadUrls.length) throw new Error('Media tidak ditemukan atau postingan tidak dapat diakses.');
     let title = 'Instagram media';
     try { title = new URLSearchParams(new URL(downloadUrls[0]).search).get('filename') || title; } catch {}
-    return { title: title.replace(/\\.mp4$/i, ''), thumbnail: $('.download-items__thumb img').attr('src') || null, downloadUrls };
+    return { title: title.replace(/\.mp4$/i, ''), thumbnail: $('.download-items__thumb img').attr('src') || null, downloadUrls };
 }
 
 module.exports = function (app) {
