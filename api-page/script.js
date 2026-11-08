@@ -856,9 +856,6 @@ async function executeApiRequest() {
     }
     if (isYoutubeDownload) {
         youtubeDownloadInProgress = true;
-        executeButton.disabled = true;
-        executeButton.dataset.originalText = executeButton.textContent;
-        executeButton.textContent = 'Sedang mengunduh...';
     }
 
     // Snapshot the selected service and form values so each click is an independent request.
@@ -877,7 +874,9 @@ async function executeApiRequest() {
     requestHeading.style.marginBottom = '.5rem';
     const requestLoading = document.createElement('p');
     requestLoading.className = 'small text-info';
-    requestLoading.textContent = 'Request sedang diproses...';
+    requestLoading.textContent = isYoutubeDownload
+        ? 'Unduhan video atau musik sedang berlangsung. Mohon tunggu hingga proses ini selesai.'
+        : 'Request sedang diproses...';
     const requestBody = document.createElement('div');
     requestCard.append(requestHeading, requestLoading, requestBody);
     responseContent.appendChild(requestCard);
@@ -968,9 +967,6 @@ async function executeApiRequest() {
     } finally {
         if (isYoutubeDownload) {
             youtubeDownloadInProgress = false;
-            executeButton.disabled = false;
-            executeButton.textContent = executeButton.dataset.originalText || 'Execute Request';
-            delete executeButton.dataset.originalText;
         }
     }
 }
