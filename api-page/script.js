@@ -842,7 +842,7 @@ async function executeApiRequest() {
 
     const item = activeApiItem;
     if (apiRequestInProgress) {
-        let notice = responseContent.querySelector('.youtube-download-wait-notice');
+        let notice = responseContent.querySelector('.api-request-wait-notice');
         if (!notice) {
             notice = document.createElement('p');
             notice.className = 'api-request-wait-notice small text-warning';
@@ -860,7 +860,10 @@ async function executeApiRequest() {
         executeButton.textContent = 'Memproses request...';
     }
 
-    // Snapshot the selected service and form values so each click is an independent request.
+    // Keep the response area to one current message/card; never stack old success or error notices.
+    responseContent.textContent = '';
+
+    // Snapshot the selected service and form values for this request.
     const requestSession = apiModalSession;
     const inputs = [...document.querySelectorAll('#apiQueryInputContainer .api-param-input')];
     const inputValues = inputs.map(input => ({
