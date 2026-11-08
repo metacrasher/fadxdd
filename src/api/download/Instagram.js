@@ -83,43 +83,89 @@ function collectMediaCandidates(value, output = [], depth = 0, mediaKind = 'vide
 }
 
 async function getRetatubeInstagramAudio(url) {
-    // Secondary source: Retatube exposes a separate audio download link in its
-    // result HTML. Keep this fallback isolated to Instagram MP3 handling.
-    try {
-        const headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36',
-            'HX-Request': 'true',
-            'Origin': 'https://retatube.com',
-            'Referer': 'https://retatube.com/'
-        };
-        const page = await axios.get('https://retatube.com/api/v1/aio/index?s=retatube.com', {
-            headers,
-            timeout: 10000
-        });
-        const $page = cheerio.load(page.data);
-        const prefix = $page('input[name="prefix"]').val();
-        if (!prefix) return null;
+    // Dedicated Instagram MP3 resolver. Retry transient failures and tolerate
+    // Retatube changing the result container/class names.
+    const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36',
+        'HX-Request': 'true',
+        'Origin': 'https://retatube.com',
+        'Referer': 'https://retatube.com/'
+    };
 
-        const result = await axios.post(
-            'https://retatube.com/api/v1/aio/search',
-            `prefix=${encodeURIComponent(prefix)}&vid=${encodeURIComponent(url)}`,
-            { headers, timeout: 12000 }
-        );
-        const $result = cheerio.load(result.data);
-        const audioLink = $result('#col-1098044499 a.custom_green_color').attr('href') ||
-            $result('#col-1098044499 a[href*="mp3"]').attr('href');
-        return safeMediaUrl(audioLink);
-    } catch {
-        // A fallback outage must not turn a working Instagram video download
-        // into an API failure.
-        return null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            const page = await axios.get('https://retatube.com/api/v1/aio/index?s=retatube.com', {
+                headers, timeout: 15000
+            });
+            const $page = cheerio.load(page.data);
+            const prefix = $page('input[name="prefix"]').val();
+            if (!prefix) throw new Error('Resolver MP3 tidak memberikan token sesi.');
+
+            const result = await axios.post(
+                'https://retatube.com/api/v1/aio/search',
+                `prefix=${encodeURIComponent(prefix)}&vid=${encodeURIComponent(url)}`,
+                { headers, timeout: 20000 }
+            );
+            const $result = cheerio.load(result.data);
+            const preferred = [
+                '#col-1098044499 a.custom_green_color',
+                '#col-1098044499 a[href]',
+                'a.custom_green_color',
+                'a[href*="mp3"]',
+                'a[href*="audio"]',
+                'a[data-url]',
+                'a[data-href]'
+            ];
+            for (const selector of preferred) {
+                const found = $result(selector).toArray()
+                    .map(node => $result(node).attr('href') || $result(node).attr('data-url') || $result(node).attr('data-href'))
+                    .map(safeMediaUrl).find(Boolean);
+                if (found) return found;
+            }
+
+            // Last-resort scan: some responses return a renamed download button.
+            const anchors = $result('a').toArray();
+            for (const node of anchors) {
+                const element = $result(node);
+                const hint = [element.text(), element.attr('class'), element.attr('id'),
+                    element.attr('title'), element.attr('aria-label')].join(' ').toLowerCase();
+                if (!/audio|mp3|music|download|unduh/.test(hint)) continue;
+                const candidate = safeMediaUrl(element.attr('href') || element.attr('data-url') || element.attr('data-href'));
+                if (candidate) return candidate;
+            }
+
+            throw new Error('Tautan audio tidak ditemukan pada respons resolver.');
+        } catch (error) {
+            const retryable = !error.response || [429, 500, 502, 503, 504].includes(error.response.status) ||
+                ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN'].includes(error.code);
+            if (attempt === 0 && retryable) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                continue;
+            }
+            return null;
+        }
     }
+    return null;
 }
 
-async function igdl(url) {
+async function igdl(url, mode = 'video') {
     if (!validInstagramUrl(url)) {
         throw new Error('Masukkan link postingan atau Reels Instagram publik yang valid.');
+    }
+
+    // MP3 requests use their own resolver and do not depend on the video provider.
+    if (mode === 'audio') {
+        const audioUrl = await getRetatubeInstagramAudio(url);
+        if (!audioUrl) {
+            throw new Error('Provider MP3 Instagram sedang tidak merespons atau tidak menyediakan tautan audio. Coba lagi beberapa saat.');
+        }
+        return {
+            title: 'Instagram media',
+            thumbnail: null,
+            video: [],
+            audio: { quality: 'MP3', url: audioUrl }
+        };
     }
 
     let response;
@@ -335,7 +381,7 @@ async function igdl(url) {
 module.exports = function (app) {
     app.get('/download/instagram', async (req, res) => {
         try {
-            const result = await igdl(String(req.query.url || '').trim());
+            const result = await igdl(String(req.query.url || '').trim(), String(req.query.mode || 'video').trim().toLowerCase());
             return res.status(200).json({ status: true, result });
         } catch (error) {
             return res.status(502).json({
