@@ -257,8 +257,35 @@ async function igdl(url) {
     const title = media.title || media.caption || payload.title || 'Instagram media';
     const thumbnail = safeMediaUrl(media.thumbnail || media.thumbnailUrl || media.thumbnail_url || payload.thumbnail);
 
+    // Extract the account that published the post from common Instagram/provider
+    // metadata shapes. Keep the username as the primary display value.
+    const findOwner = (object, depth = 0) => {
+        if (!object || typeof object !== 'object' || depth > 5) return '';
+        const ownerKeys = ['owner', 'user', 'author', 'uploader', 'account', 'profile'];
+        for (const key of ownerKeys) {
+            const candidate = object[key];
+            if (candidate && typeof candidate === 'object') {
+                const username = candidate.username || candidate.userName || candidate.handle ||
+                    candidate.unique_id || candidate.uniqueId || candidate.full_name || candidate.fullName ||
+                    candidate.name;
+                if (typeof username === 'string' && username.trim()) return username.trim();
+            } else if (typeof candidate === 'string' && candidate.trim()) {
+                return candidate.trim();
+            }
+        }
+        for (const value of Object.values(object)) {
+            if (value && typeof value === 'object') {
+                const found = findOwner(value, depth + 1);
+                if (found) return found;
+            }
+        }
+        return '';
+    };
+    const owner = findOwner(media) || findOwner(payload);
+
     return {
         title: String(title).slice(0, 180),
+        owner: String(owner || '').slice(0, 80),
         thumbnail,
         video: video.map((item, index) => ({
             quality: String(item.quality || (index === 0 ? 'Terbaik' : `Pilihan ${index + 1}`)),
