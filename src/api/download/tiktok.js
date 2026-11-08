@@ -24,7 +24,14 @@ module.exports = function (app) {
             const media = await axios.get(parsed.href, {
                 responseType: 'stream',
                 timeout: 60000,
-                maxRedirects: 0,
+                maxRedirects: 5,
+                beforeRedirect: (options) => {
+                    const redirectHost = String(options.hostname || '').toLowerCase();
+                    const redirectProtocol = options.protocol || 'https:';
+                    if (redirectProtocol !== 'https:' || !allowedHost.test(redirectHost)) {
+                        throw new Error('CDN redirect host is not allowed.');
+                    }
+                },
                 maxContentLength: 100 * 1024 * 1024,
                 headers: { 'User-Agent': 'Mozilla/5.0', Referer: 'https://www.tiktok.com/' }
             });
