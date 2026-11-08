@@ -3,7 +3,7 @@ const axios = require('axios');
 function validTikTokUrl(value) {
     try {
         const u = new URL(value);
-        return /^([a-z0-9-]+\\.)*tiktok\\.com$/i.test(u.hostname);
+        return /^([a-z0-9-]+\.)*tiktok\.com$/i.test(u.hostname);
     } catch { return false; }
 }
 
@@ -17,8 +17,8 @@ function normalizeMediaUrl(value) {
 }
 
 function isAllowedMediaHost(hostname) {
-    const host = String(hostname || '').toLowerCase().replace(/\\.$/, '');
-    return /(^|\\.)(tiktokcdn(?:-[a-z0-9-]+)?\\.com|tiktokv\\.com|byteoversea\\.com|ibytedtos\\.com|muscdn\\.com|tikwm\\.com|tiktok\\.com|akamaized\\.net|tokcdn\\.com)$/.test(host);
+    const host = String(hostname || '').toLowerCase().replace(/\.$/, '');
+    return /(^|\.)(tiktokcdn(?:-[a-z0-9-]+)?\.com|tiktokv\.com|byteoversea\.com|ibytedtos\.com|muscdn\.com|tikwm\.com|tiktok\.com|akamaized\.net|tokcdn\.com)$/.test(host);
 }
 
 module.exports = function (app) {
