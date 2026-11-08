@@ -1,8 +1,8 @@
 const axios = require('axios');
 
 function allowedHost(hostname) {
-    const host = String(hostname || '').toLowerCase().replace(/\\.$/, '');
-    return /(^|\\.)savetube\\.(vip|me|io)$/.test(host);
+    const host = String(hostname || '').toLowerCase().replace(/\.$/, '');
+    return /(^|\.)savetube\.(vip|me|io)$/.test(host);
 }
 
 module.exports = function (app) {
@@ -16,7 +16,7 @@ module.exports = function (app) {
 
         const format = String(req.query.format || 'mp4').toLowerCase() === 'mp3' ? 'mp3' : 'mp4';
         const fallback = format === 'mp3' ? 'youtube-audio.mp3' : 'youtube-video.mp4';
-        const filename = String(req.query.name || fallback).replace(/[\\r\\n"]/g, '').replace(/[^a-z0-9._() -]/gi, '_').slice(0, 160) || fallback;
+        const filename = String(req.query.name || fallback).replace(/[\r\n"]/g, '').replace(/[^a-z0-9._() -]/gi, '_').slice(0, 160) || fallback;
 
         try {
             const upstream = await axios.get(source.href, {
