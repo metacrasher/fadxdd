@@ -734,7 +734,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
             }
             const audioLink = document.createElement('a');
             audioLink.className = 'api-download-button';
-            audioLink.href = '/download/instagram/file?url=' + encodeURIComponent(result.audio.url) + '&format=mp3';
+            audioLink.href = result.audio.url;
             audioLink.setAttribute('download', '');
             audioLink.textContent = '⬇ Download MP3';
             container.appendChild(audioLink);
@@ -771,7 +771,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         downloadLink.setAttribute('download', '');
         const updateDownload = () => {
             const selected = qualities[Number(qualitySelect.value)] || qualities[0];
-            downloadLink.href = '/download/instagram/file?url=' + encodeURIComponent(selected.url) + '&format=mp4';
+            downloadLink.href = selected.url;
             downloadLink.textContent = '⬇ Download ' + (selected.quality || 'Video');
         };
         qualitySelect.addEventListener('change', updateDownload);
