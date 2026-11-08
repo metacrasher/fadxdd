@@ -1021,6 +1021,7 @@ async function executeApiRequest() {
                 if (mode === 'video') url.searchParams.set('quality', selectedQuality);
             }
             url.searchParams.set('url', videoUrl);
+            if (item.id === 'instagram') url.searchParams.set('mode', mode);
         }
 
         for (const input of inputValues) {
