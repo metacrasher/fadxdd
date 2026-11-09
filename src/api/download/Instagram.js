@@ -200,7 +200,7 @@ async function igdl(url, mode = 'video') {
             throw new Error('Provider Instagram dan server cadangan melewati batas waktu. Silakan coba lagi.');
         }
         if (error.response) {
-            throw new Error(`Provider Instagram mengalami HTTP ${error.response.status} saat menghubungi server.`);
+            throw new Error('Provider Instagram mengalami masalah saat menghubungi server.');
         }
         const networkErrors = {
             ENOTFOUND: 'DNS provider tidak ditemukan dari server API.',
