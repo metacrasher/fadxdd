@@ -889,3 +889,64 @@ body, #loadingScreen{
   content: none!important;
   display: none!important;
 }
+
+
+/* Professional suggestion and developer contact section below the downloader list. */
+.downloader-suggestion{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  margin:8px 0 56px;
+  padding:clamp(22px,4vw,34px);
+  border:1px solid rgba(164,105,255,.28);
+  border-radius:18px;
+  background:linear-gradient(120deg,rgba(111,54,190,.14),rgba(14,12,25,.72));
+}
+.downloader-suggestion-copy{max-width:680px}
+.downloader-suggestion-eyebrow{
+  display:inline-block;
+  margin-bottom:9px;
+  color:#b991ff;
+  font-size:.7rem;
+  font-weight:800;
+  letter-spacing:.16em;
+}
+.downloader-suggestion h3{
+  margin:0 0 9px;
+  color:#f5efff;
+  font-size:clamp(1.05rem,2.2vw,1.35rem);
+  font-weight:750;
+}
+.downloader-suggestion p{
+  margin:0;
+  color:rgba(235,226,250,.72);
+  font-size:.92rem;
+  line-height:1.7;
+}
+.downloader-suggestion-link{
+  display:inline-flex;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px 18px;
+  border:1px solid rgba(183,139,255,.5);
+  border-radius:10px;
+  background:rgba(132,78,218,.2);
+  color:#eadcff;
+  font-size:.88rem;
+  font-weight:700;
+  text-decoration:none;
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.downloader-suggestion-link:hover{
+  transform:translateY(-1px);
+  border-color:#b991ff;
+  background:rgba(132,78,218,.34);
+  color:#fff;
+}
+@media(max-width:640px){
+  .downloader-suggestion{align-items:flex-start;flex-direction:column;gap:18px}
+  .downloader-suggestion-link{width:100%}
+}
