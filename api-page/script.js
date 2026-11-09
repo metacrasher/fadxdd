@@ -189,6 +189,13 @@ function renderCategories(categories) {
         count.className = 'category-count';
         count.textContent = `${category.items.length} SERVICES`;
         heading.append(title, count);
+        if (String(category.name || '').trim().toLowerCase() === 'social media downloader') {
+            const legend = document.createElement('div');
+            legend.className = 'service-status-legend category-status-legend';
+            legend.setAttribute('aria-label', 'Keterangan status layanan');
+            legend.innerHTML = '<span class="service-status-item is-active"><i></i> AKTIF</span><span class="service-status-item is-error"><i></i> GANGGUAN</span>';
+            heading.appendChild(legend);
+        }
         const grid = document.createElement('div');
         grid.className = 'api-grid';
 
