@@ -67,7 +67,7 @@ function collectMediaCandidates(value, output = [], depth = 0, mediaKind = 'vide
         const raw = value[key];
         const candidate = safeMediaUrl(typeof raw === 'string' ? raw : raw?.url || raw?.downloadUrl);
         if (candidate) {
-            const kind = mediaKind === 'audio' || /\\.(mp3|m4a|aac|ogg)(?:$|\\?)/i.test(candidate) ? 'audio' : 'video';
+            const kind = mediaKind === 'audio' || /\.(mp3|m4a|aac|ogg)(?:$|\?)/i.test(candidate) ? 'audio' : 'video';
             output.push({ quality: String(quality || (kind === 'audio' ? 'MP3' : 'Terbaik')), url: candidate, kind });
         }
     }
@@ -194,19 +194,8 @@ async function igdl(url, mode = 'video') {
             }
         }
     } catch (error) {
-        // If the primary provider cannot be reached, try the dedicated Instagram
-        // audio resolver before returning a provider-connection error. This keeps
-        // the MP3 path independent from the primary video resolver.
-        const fallbackAudio = requestErrorIsClientError(error) ? null : await getRetatubeInstagramAudio(url);
-        if (fallbackAudio) {
-            return {
-                title: 'Instagram media',
-                thumbnail: null,
-                video: [],
-                audio: { quality: 'MP3', url: fallbackAudio }
-            };
-        }
-
+        // MP4 requests must never return an MP3-only result.
+        // The dedicated MP3 resolver is used only when mode === 'audio'.
         if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
             throw new Error('Provider Instagram dan server cadangan melewati batas waktu. Silakan coba lagi.');
         }
