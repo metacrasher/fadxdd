@@ -884,7 +884,7 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         options.forEach(option => {
             const anchor = document.createElement('a');
             anchor.className = 'api-download-button';
-            anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent((result.title || 'tiktok-media').slice(0, 80)) + (selectedMode === 'audio' ? '&format=mp3' : '&format=mp4');
+            anchor.href = '/download/tiktok/file?url=' + encodeURIComponent(option.url) + '&name=' + encodeURIComponent(videoTitle.slice(0, 80)) + (selectedMode === 'audio' ? '&format=mp3' : '&format=mp4');
             anchor.setAttribute('download', '');
             anchor.textContent = selectedMode === 'audio' ? '⬇ Download' : '⬇ Unduh ' + option.quality;
             container.appendChild(anchor);
