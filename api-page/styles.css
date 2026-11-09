@@ -836,3 +836,15 @@ body, #loadingScreen{
   box-shadow:none!important;
   text-decoration:none!important;
 }
+
+
+/* Restore the service legend's active status to green; keep the outage status red. */
+.service-status-item.is-active{
+  color:#80e7b8!important;
+  border-color:rgba(56,232,155,.34)!important;
+  background:rgba(56,232,155,.08)!important;
+}
+.service-status-item.is-active i{
+  background:#38e89b!important;
+  box-shadow:0 0 10px rgba(56,232,155,.75)!important;
+}
