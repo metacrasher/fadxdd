@@ -297,11 +297,15 @@ async function checkServerHealth() {
 function setApiHealth(id, online) {
     const el = document.querySelector(`[data-health-for="${CSS.escape(id)}"]`);
     if (!el) return;
-    el.classList.toggle('is-online', !!online);
-    el.classList.toggle('is-offline', !online);
+    // Instagram keeps its service badge as AKTIF; individual request errors
+    // are displayed separately inside the response modal.
+    const isInstagram = String(id).toLowerCase() === 'instagram';
+    const serviceOnline = isInstagram ? true : !!online;
+    el.classList.toggle('is-online', serviceOnline);
+    el.classList.toggle('is-offline', !serviceOnline);
     el.classList.remove('is-unknown');
     const label = el.querySelector('span');
-    if (label) label.textContent = online ? (['tiktok', 'youtube'].includes(id) ? 'AKTIF' : 'API AKTIF') : 'API ERROR';
+    if (label) label.textContent = isInstagram ? 'AKTIF' : serviceOnline ? (['tiktok', 'youtube'].includes(id) ? 'AKTIF' : 'API AKTIF') : 'API ERROR';
 }
 
 /* =========================================
