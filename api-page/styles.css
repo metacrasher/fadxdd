@@ -1276,3 +1276,9 @@ body, #loadingScreen{
 .hero-copy > h1 b{background-image:linear-gradient(105deg,#a83cff 0%,#c77bff 24%,#fff 36%,#fff 42%,#ead9ff 48%,#fff 54%,#fff 60%,#a83cff 76%,#c77bff 100%)!important}
 @keyframes fadxdWordmarkShimmerFast{0%{background-position:100% 0}100%{background-position:-100% 0}}
 @media(prefers-reduced-motion:reduce){.hero-copy > h1 span,.hero-copy > h1 b{animation:none!important}}
+
+/* Keep every logo layer still until the character artwork is separated into real body/face layers. */
+.brand-mark img,.profile-avatar img,.hero-anime{animation:none!important;transform:none!important;filter:none!important}
+.ambient-rain{z-index:1}
+.storm-lightning{z-index:2}
+.navbar,main,.site-footer{position:relative;z-index:3}
