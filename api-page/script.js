@@ -271,6 +271,12 @@ function renderCategories(categories) {
         container.appendChild(section);
     });
 
+    // Professional suggestion/contact prompt shown beneath the downloader service list.
+    const suggestion = document.createElement('section');
+    suggestion.className = 'downloader-suggestion';
+    suggestion.innerHTML = '<div class="downloader-suggestion-copy"><span class="downloader-suggestion-eyebrow">PUNYA IDE?</span><h3>Ada saran downloader atau aplikasi lain?</h3><p>Sampaikan ide dan masukan Anda kepada developer. Setiap saran akan menjadi bahan pertimbangan untuk pengembangan FadXD selanjutnya.</p></div><a class="downloader-suggestion-link" href="https://wa.me/6285273114090" target="_blank" rel="noopener noreferrer">Hubungi Developer <span aria-hidden="true">↗</span></a>';
+    container.appendChild(suggestion);
+
     // Real server status is checked on page load; other integrations turn green only
     // after a successful real request, never from a hard-coded "online" label.
     checkServerHealth();
