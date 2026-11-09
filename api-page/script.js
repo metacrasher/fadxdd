@@ -843,19 +843,38 @@ function renderApiResult(container, data, mode, quality, item = activeApiItem) {
         const options = selectedMode === 'audio'
             ? (result.audio ? [{ quality: 'MP3', url: result.audio.url }] : [])
             : (Array.isArray(result.video) ? result.video.map(v => ({ quality: v.quality || 'MP4', url: v.url })) : []);
-        if (result.thumbnail) {
+        const metadata = findMediaMetadata(data);
+        const videoTitle = String(
+            result.title || result.desc || result.caption ||
+            data?.title || data?.desc || metadata.caption ||
+            metadata.title || ''
+        ).trim() || 'Video TikTok';
+        const authorName = result.author?.nickname || result.author?.name ||
+            result.author || result.username || metadata.author || '';
+        const preview = document.createElement('section');
+        preview.className = 'yt-video-preview tiktok-video-preview';
+        if (result.thumbnail && /^https?:\\/\\//i.test(result.thumbnail)) {
             const image = document.createElement('img');
             image.className = 'yt-video-thumbnail';
             image.src = result.thumbnail;
             image.alt = 'Thumbnail TikTok';
-            container.appendChild(image);
+            image.loading = 'lazy';
+            image.referrerPolicy = 'no-referrer';
+            preview.appendChild(image);
         }
-        const heading = document.createElement('p');
-        heading.className = 'api-result-heading';
-        const postCaption = findMediaMetadata(data).caption;
-        heading.textContent = postCaption || result.title || 'TikTok media';
-        heading.classList.add('tiktok-post-caption');
-        container.appendChild(heading);
+        const info = document.createElement('div');
+        info.className = 'yt-video-info';
+        const heading = document.createElement('h4');
+        heading.className = 'tiktok-post-caption';
+        heading.textContent = videoTitle;
+        const meta = document.createElement('p');
+        meta.textContent = [
+            authorName ? (String(authorName).startsWith('@') ? String(authorName) : '@' + String(authorName)) : '',
+            selectedMode === 'audio' ? 'Musik TikTok • MP3' : 'Video TikTok • MP4'
+        ].filter(Boolean).join(' • ');
+        info.append(heading, meta);
+        preview.appendChild(info);
+        container.appendChild(preview);
         if (!options.length) {
             const note = document.createElement('p');
             note.className = 'small text-warning';
