@@ -950,3 +950,24 @@ body, #loadingScreen{
   .downloader-suggestion{align-items:flex-start;flex-direction:column;gap:18px}
   .downloader-suggestion-link{width:100%}
 }
+
+
+/* Compact, readable error notices shared by every downloader API. */
+#apiResponseModal .api-request-result.has-api-error .api-error-message,
+#apiResponseModal .api-request-result.has-api-error .api-error-message *,
+#apiContent .alert.alert-danger,
+#apiContent .alert.alert-danger *{
+  box-sizing:border-box!important;
+  max-width:100%!important;
+  font-size:.82rem!important;
+  line-height:1.5!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+#apiResponseModal .api-request-result.has-api-error .api-error-message,
+#apiContent .alert.alert-danger{
+  width:100%!important;
+  margin:12px auto!important;
+  text-align:center!important;
+  text-wrap:pretty;
+}

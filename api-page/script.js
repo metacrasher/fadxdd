@@ -1012,7 +1012,7 @@ async function executeApiRequest() {
                 ? (document.getElementById('yt-quality')?.value || '360')
                 : 'best';
             const videoUrl = url.searchParams.get('url');
-            if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : item.id === 'instagram' ? 'Masukkan link Instagram yang valid.' : 'Masukan link TikTok yang valid.');
+            if (!videoUrl) throw new Error(item.id === 'youtube' ? 'Masukan link youtube yang valid.' : item.id === 'instagram' ? 'Masukkan link Instagram yang valid.' : 'Masukkan link TikTok yang valid.');
             if (item.id === 'youtube') {
                 let parsedVideoUrl;
                 try {
