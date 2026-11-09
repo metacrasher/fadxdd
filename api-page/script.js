@@ -1061,6 +1061,7 @@ async function executeApiRequest() {
     } catch (error) {
         if (requestSession !== apiModalSession) return;
         requestLoading.remove();
+        requestCard.classList.add('has-api-error');
         const message = document.createElement('p');
         message.className = 'api-error-message';
         message.textContent = error.name === 'TimeoutError' ? 'Request timeout. Coba lagi beberapa saat.' : cleanApiErrorMessage(error.message);
