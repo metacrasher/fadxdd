@@ -848,3 +848,44 @@ body, #loadingScreen{
   background:#38e89b!important;
   box-shadow:0 0 10px rgba(56,232,155,.75)!important;
 }
+
+
+/* Final error presentation: errors must not inherit the bordered request card or legacy status colors. */
+#apiResponseModal .api-request-result.has-api-error {
+  margin: 10px 0!important;
+  padding: 0!important;
+  border: 0!important;
+  outline: 0!important;
+  border-radius: 0!important;
+  background: transparent!important;
+  box-shadow: none!important;
+}
+#apiResponseModal .api-request-result.has-api-error .api-error-message,
+#apiResponseModal .api-request-result.has-api-error .api-error-message *,
+#apiContent .alert.alert-danger,
+#apiContent .alert.alert-danger * {
+  display: block!important;
+  margin: 0!important;
+  padding: 0!important;
+  color: #ff858f!important;
+  -webkit-text-fill-color: #ff858f!important;
+  border: 0!important;
+  outline: 0!important;
+  border-radius: 0!important;
+  background: transparent!important;
+  box-shadow: none!important;
+  text-decoration: none!important;
+  text-shadow: none!important;
+}
+#apiResponseModal .api-request-result.has-api-error .api-error-message {
+  margin: 10px 0!important;
+}
+#apiResponseModal .api-request-result.has-api-error::before,
+#apiResponseModal .api-request-result.has-api-error::after,
+#apiResponseModal .api-request-result.has-api-error .api-error-message::before,
+#apiResponseModal .api-request-result.has-api-error .api-error-message::after,
+#apiContent .alert.alert-danger::before,
+#apiContent .alert.alert-danger::after {
+  content: none!important;
+  display: none!important;
+}
