@@ -1234,3 +1234,30 @@ body, #loadingScreen{
   .hero-anime,.brand-mark img,.profile-avatar img{animation:none!important}
   .ambient-rain{display:none!important}
 }
+
+
+/* Repeating purple-silver shimmer across the FADXD homepage wordmark. */
+.hero-copy > h1 span,
+.hero-copy > h1 b{
+  display:inline-block;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  background-clip:text!important;
+  -webkit-background-clip:text!important;
+  background-size:260% 100%!important;
+  background-position:100% 0!important;
+  animation:fadxdWordmarkShimmer 4.2s ease-in-out infinite;
+}
+.hero-copy > h1 span{
+  background-image:linear-gradient(105deg,#f4efff 0%,#f4efff 34%,#ffffff 43%,#d9c4ff 49%,#ffffff 54%,#f4efff 64%,#f4efff 100%)!important;
+}
+.hero-copy > h1 b{
+  background-image:linear-gradient(105deg,#bd5cff 0%,#bd5cff 34%,#fff 44%,#e6d2ff 50%,#fff 55%,#bd5cff 65%,#bd5cff 100%)!important;
+}
+@keyframes fadxdWordmarkShimmer{
+  0%,12%{background-position:100% 0}
+  72%,100%{background-position:-100% 0}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-copy > h1 span,.hero-copy > h1 b{animation:none!important;background-position:50% 0!important}
+}
