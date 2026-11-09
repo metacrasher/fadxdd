@@ -453,7 +453,7 @@ function openApiModal(item) {
     if (isYoutube || isTikTok || isInstagram) {
         const modeGroup = document.createElement('div');
         modeGroup.className = 'mb-3 api-input-group';
-        modeGroup.innerHTML = '<label class="form-label" for="yt-mode">Format</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
+        modeGroup.innerHTML = '<label class="form-label" for="yt-mode">FORMAT</label><select id="yt-mode" class="form-select"><option value="video">Video (MP4)</option><option value="audio">Musik (MP3)</option></select>';
         inputContainer.appendChild(modeGroup);
     }
 
@@ -462,7 +462,7 @@ function openApiModal(item) {
         group.className = 'mb-3 api-input-group';
         const label = document.createElement('label');
         label.className = 'form-label';
-        label.textContent = parameter;
+        label.textContent = parameter.toLowerCase() === 'url' ? 'URL' : parameter;
         label.htmlFor = `api-param-${index}`;
         const input = document.createElement('input');
         input.type = 'text';
