@@ -683,3 +683,64 @@ body:before,body:after{
   #apiResponseModal .modal-dialog{margin:8px}
   #apiResponseModal .modal-content{border-radius:12px!important}
 }
+
+
+/* ===== Final theme audit: remove remaining legacy cyan styling ===== */
+:root{
+  --bg:#08030f!important;
+  --panel:#12091f!important;
+  --panel2:#1b0d2d!important;
+  --cyan:#bd5cff!important;
+  --blue:#9b55f5!important;
+  --text:#fbf5ff!important;
+  --muted:#b5a0c9!important;
+  --line:rgba(189,92,255,.25)!important;
+  --glow:0 0 30px rgba(189,92,255,.24)!important;
+}
+body, #loadingScreen{
+  background-color:#08030f!important;
+  color:#fbf5ff;
+}
+.loader-core{border-color:rgba(189,92,255,.2);border-top-color:#bd5cff}
+.profile-overlay{background:rgba(5,0,12,.78)}
+.profile-drawer{background:linear-gradient(160deg,#1a0b2a,#08030f)!important;border-color:rgba(189,92,255,.35)!important}
+.profile-avatar{border-color:#bd5cff!important;box-shadow:0 0 28px rgba(189,92,255,.25)!important}
+.profile-avatar i{border-color:#1a0b2a}
+.drawer-header,.drawer-divider{border-color:rgba(189,92,255,.22)!important}
+.drawer-close{border-color:rgba(189,92,255,.35)!important;color:#ead8ff!important}
+.social-link{border-color:rgba(189,92,255,.22)!important;background:rgba(189,92,255,.045)!important}
+.social-icon,.social-arrow{color:#c77aff!important}
+.social-link:hover{border-color:rgba(204,130,255,.65)!important;background:rgba(189,92,255,.1)!important}
+.site-footer{background:#08030f!important;border-color:rgba(189,92,255,.25)!important}
+.api-raw-result{color:#c7b0dc!important}
+.api-raw-result>pre{background:#0d0617!important;border-color:rgba(189,92,255,.2)!important;color:#ead8ff!important}
+.api-raw-toolbar,.api-raw-summary,.api-raw-result summary{border-color:rgba(189,92,255,.2)!important;background:rgba(189,92,255,.045)!important;color:#e7d2fa!important}
+.api-raw-format,.api-raw-summary-copy strong{color:#d5a2ff!important}
+.api-raw-toolbar i{background:#c77aff!important;box-shadow:0 0 9px rgba(199,122,255,.65)!important}
+.api-raw-result[open]{border-color:rgba(189,92,255,.38)!important;box-shadow:0 0 24px rgba(189,92,255,.07)!important}
+.yt-video-preview{border-color:rgba(189,92,255,.28)!important;background:linear-gradient(135deg,rgba(189,92,255,.08),rgba(10,5,18,.92))!important}
+.yt-video-thumbnail{background:#08030f!important}
+.api-response-accepted{border-color:rgba(189,92,255,.28)!important;background:linear-gradient(110deg,rgba(189,92,255,.09),rgba(189,92,255,.025))!important;color:#f5eaff!important}
+.api-response-accepted-dot{background:#c77aff!important;box-shadow:0 0 12px rgba(199,122,255,.7)!important}
+.api-response-accepted small{color:#bda8d0!important}
+.platform-notice{border-color:rgba(189,92,255,.22)!important;border-left-color:#bd5cff!important;background:linear-gradient(110deg,rgba(189,92,255,.08),rgba(18,8,30,.6))!important}
+.service-status-item.is-active{color:#c5a0ff!important;border-color:rgba(189,92,255,.28)!important;background:rgba(189,92,255,.07)!important}
+.service-status-item.is-active i{background:#c77aff!important;box-shadow:0 0 10px rgba(199,122,255,.7)!important}
+
+/* Failure messages should be plain red text, with no surrounding outline or box. */
+.api-error-message,
+.alert.alert-danger{
+  display:block!important;
+  padding:0!important;
+  margin:10px 0!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  color:#ff858f!important;
+}
+.api-error-message::before,
+.api-error-message::after{display:none!important;content:none!important}
+.alert.alert-danger strong,
+.alert.alert-danger p{color:#ff858f!important}
