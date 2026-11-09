@@ -1211,3 +1211,26 @@ body, #loadingScreen{
   .api-category[data-category="SOCIAL MEDIA DOWNLOADER"] .category-title { font-size:clamp(20px,6vw,27px); }
   .category-status-legend { gap:8px; }
 }
+
+
+/* Ambient rain: subtle cool highlights that preserve the original purple/black theme. */
+.ambient-rain{
+  position:fixed;inset:0;width:100%;height:100%;
+  z-index:1;pointer-events:none;opacity:.72;
+}
+.navbar,main,.site-footer{position:relative;z-index:2}
+.profile-overlay,.profile-drawer{z-index:1200}
+#loadingScreen{z-index:2000}
+.hero-anime,.brand-mark img,.profile-avatar img{
+  transform-origin:50% 55%;
+  animation:fadxdBreathing 4.8s ease-in-out infinite;
+  will-change:transform,filter;
+}
+@keyframes fadxdBreathing{
+  0%,100%{transform:scale(1);filter:drop-shadow(0 0 9px rgba(151,78,255,.24))}
+  50%{transform:scale(1.035);filter:drop-shadow(0 0 17px rgba(133,76,255,.52))}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-anime,.brand-mark img,.profile-avatar img{animation:none!important}
+  .ambient-rain{display:none!important}
+}
