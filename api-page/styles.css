@@ -809,3 +809,30 @@ body, #loadingScreen{
 #apiResponseModal .alert.alert-danger .text-warning {
   color:#ff858f!important;
 }
+
+
+/* Last-resort modal error reset: Bootstrap and legacy styles must not restore a box or green text. */
+#apiResponseModal .modal-body p.api-error-message,
+#apiResponseModal .modal-body .api-error-message,
+#apiResponseModal .modal-body .alert.alert-danger {
+  --bs-alert-color:#ff858f!important;
+  --bs-alert-bg:transparent!important;
+  --bs-alert-border-color:transparent!important;
+  color:#ff858f!important;
+  background:transparent!important;
+  border:0!important;
+  border-color:transparent!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+#apiResponseModal .modal-body .api-error-message *,
+#apiResponseModal .modal-body .alert.alert-danger * {
+  color:#ff858f!important;
+  background:transparent!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+}
