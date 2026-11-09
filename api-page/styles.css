@@ -1282,3 +1282,33 @@ body, #loadingScreen{
 .ambient-rain{z-index:1}
 .storm-lightning{z-index:2}
 .navbar,main,.site-footer{position:relative;z-index:3}
+
+
+/* One travelling highlight across the complete FADXD wordmark: F -> A -> D -> X -> D. */
+.hero-copy > h1.fadxd-wordmark-sweep{
+  display:inline-block;
+  color:transparent!important;
+  -webkit-text-fill-color:transparent!important;
+  background-image:linear-gradient(90deg,
+    #cda6ff 0%,
+    #cda6ff 39%,
+    #f2e8ff 44%,
+    #ffffff 48%,
+    #ffffff 51%,
+    #d9bdff 55%,
+    #cda6ff 61%,
+    #cda6ff 100%)!important;
+  background-size:260% 100%!important;
+  background-position:100% 0!important;
+  background-clip:text!important;
+  -webkit-background-clip:text!important;
+  animation:fadxdOnePassShimmer 2.8s linear infinite!important;
+  filter:drop-shadow(0 0 8px rgba(205,166,255,.65));
+}
+@keyframes fadxdOnePassShimmer{
+  0%{background-position:100% 0}
+  100%{background-position:0 0}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-copy > h1.fadxd-wordmark-sweep{animation:none!important;background-position:50% 0!important}
+}
