@@ -566,9 +566,10 @@ function openApiModal(item) {
 
             const isVideoMode = modeSelect.value === 'video';
             qualityGroup.style.display = isVideoMode ? '' : 'none';
-            if (executeButton) executeButton.disabled = true;
+            // Metadata is optional: never make users wait for a preview before downloading.
+            if (executeButton) executeButton.disabled = false;
             const status = document.getElementById('yt-quality-status');
-            if (status) status.textContent = 'Memeriksa video YouTube...';
+            if (status) status.textContent = 'Memuat preview di latar belakang; unduhan bisa langsung dimulai.';
             try {
                 const response = await fetch('/download/youtube/info?url=' + encodeURIComponent(value), {
                     headers: { Accept: 'application/json' },
@@ -598,16 +599,17 @@ function openApiModal(item) {
             } catch (error) {
                 if (requestId !== metadataRequestId) return;
                 youtubePreviewGroup?.classList.add('d-none');
-                if (executeButton) executeButton.disabled = true;
-                if (status) status.textContent = 'Preview belum tersedia. Periksa link YouTube dan coba lagi.';
+                // A preview/provider metadata failure must not block the actual download request.
+                if (executeButton) executeButton.disabled = false;
+                if (status) status.textContent = 'Preview tidak tersedia saat ini. Anda tetap bisa melanjutkan unduhan.';
             }
         };
         urlInput?.addEventListener('input', () => {
             clearTimeout(metadataTimer);
             metadataRequestId++;
             youtubePreviewGroup?.classList.add('d-none');
-            if (executeButton) executeButton.disabled = true;
-            metadataTimer = setTimeout(loadYoutubeInfo, 650);
+            if (executeButton) executeButton.disabled = !urlInput?.value.trim();
+            metadataTimer = setTimeout(loadYoutubeInfo, 350);
         });
         urlInput?.addEventListener('change', loadYoutubeInfo);
 
@@ -1047,8 +1049,9 @@ async function executeApiRequest() {
             if (!input.value) throw new Error(`Kolom ${input.parameter} wajib diisi.`);
         }
 
+        // Give all download providers a wider client-side response window.
         // YouTube MP3 conversion can take longer than ordinary API calls.
-        const requestTimeout = item.id === 'youtube' && mode === 'audio' ? 180000 : 60000;
+        const requestTimeout = item.id === 'youtube' && mode === 'audio' ? 180000 : 120000;
         const response = await fetch(url.href, { method: 'GET', headers: { Accept: 'application/json, text/plain, */*' }, signal: AbortSignal.timeout(requestTimeout) });
         responseStatus = response.status;
         serverFailure = response.status >= 500 || response.status === 429;
