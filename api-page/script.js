@@ -426,8 +426,10 @@ function initApiModal() {
         return;
     }
 
+    // Bootstrap is loaded with defer before this script. Resolve the instance
+    // again here so a delayed CDN load cannot leave every API button inert.
     if (window.bootstrap?.Modal) {
-        apiModalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+        apiModalInstance = window.bootstrap.Modal.getOrCreateInstance(modalElement);
     } else {
         console.error('[FadXD API] Bootstrap Modal is unavailable.');
     }
@@ -446,6 +448,12 @@ function initApiModal() {
 
 
 function openApiModal(item) {
+    // Lazy recovery: if initialization ran before Bootstrap was ready,
+    // create the modal instance at click time instead of silently doing nothing.
+    const modalElement = document.getElementById('apiResponseModal');
+    if (!apiModalInstance && modalElement && window.bootstrap?.Modal) {
+        apiModalInstance = window.bootstrap.Modal.getOrCreateInstance(modalElement);
+    }
     apiModalSession++;
     activeApiItem = item;
     const title = document.getElementById('apiResponseModalLabel');
