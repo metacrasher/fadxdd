@@ -1086,3 +1086,87 @@ body, #loadingScreen{
   .hero-stats{gap:9px!important}
   .hero-stats i{height:22px}
 }
+
+
+/* Desktop hero alignment: keep copy and artwork in a balanced, non-overlapping grid. */
+@media (min-width: 901px) {
+  .hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+    align-items: center;
+    column-gap: clamp(28px, 4vw, 64px);
+    min-height: 620px;
+    padding: 58px 24px 68px;
+  }
+  .hero-copy {
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 !important;
+  }
+  .hero-art {
+    position: relative !important;
+    grid-column: 2;
+    grid-row: 1;
+    inset: auto !important;
+    transform: none !important;
+    justify-self: center;
+    align-self: center;
+    width: min(100%, 430px);
+    height: 470px;
+    margin: 0;
+    opacity: 1;
+  }
+  .hero-anime {
+    width: min(78%, 335px);
+    height: min(94%, 440px);
+    object-fit: cover;
+  }
+  .hero-version {
+    right: 24px;
+    bottom: 18px;
+  }
+  .hero-kicker {
+    margin-top: 12px;
+    letter-spacing: 3px;
+  }
+  .hero h1 {
+    font-size: clamp(64px, 7vw, 100px);
+    letter-spacing: -5px;
+  }
+  .hero-description {
+    max-width: 520px;
+  }
+  .platform-notice {
+    max-width: 560px;
+  }
+  .hero-stats {
+    flex-wrap: wrap;
+    gap: clamp(14px, 2vw, 24px);
+    margin-top: 30px;
+  }
+}
+@media (min-width: 901px) and (max-width: 1100px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(270px, .8fr);
+    column-gap: 22px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .hero-art { height: 390px; }
+  .hero h1 { font-size: clamp(58px, 6.5vw, 76px); }
+  .hero-stats { gap: 12px; }
+}
+
+/* Keep the Instagram service badge green; request errors stay in the response modal. */
+.api-item [data-health-for="instagram"] {
+  color: #45e58b !important;
+  border-color: rgba(69,229,139,.35) !important;
+  background: rgba(69,229,139,.08) !important;
+}
+.api-item [data-health-for="instagram"] i {
+  background: #35e982 !important;
+  box-shadow: 0 0 12px rgba(53,233,130,.9) !important;
+}
