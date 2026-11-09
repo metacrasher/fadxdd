@@ -615,3 +615,71 @@ body:before,body:after{
   .brand-tagline{max-width:190px;font-size:7px}
   .brand-copy #header{font-size:10px}
 }
+
+
+/* ===== Purple-neon theme for every downloader modal and form ===== */
+#apiResponseModal .modal-content,
+.modal-content{
+  color:#fbf5ff!important;
+  background:linear-gradient(155deg,#1b0b2b 0%,#10071b 52%,#08030f 100%)!important;
+  border:1px solid rgba(189,92,255,.42)!important;
+  border-radius:14px!important;
+  box-shadow:0 18px 65px rgba(0,0,0,.62),0 0 28px rgba(159,67,255,.13)!important;
+}
+#apiResponseModal .modal-header,
+#apiResponseModal .modal-footer,
+.modal-header,.modal-footer{
+  background:rgba(189,92,255,.055)!important;
+  border-color:rgba(189,92,255,.2)!important;
+}
+#apiResponseModal .modal-title,
+.modal-header h5{color:#fbf5ff!important}
+#apiResponseModal .modal-body,
+.modal-body{background:transparent!important;color:#eadcf7!important}
+#apiResponseModal .modal-body .form-label,
+.modal-body .form-label{color:#d9b9f5!important;font-weight:700;letter-spacing:.7px}
+#apiResponseModal .form-control,
+#apiResponseModal .form-select,
+.modal-body .form-control,
+.modal-body .form-select{
+  color:#fbf5ff!important;
+  background-color:#10071b!important;
+  border:1px solid rgba(189,92,255,.38)!important;
+  border-radius:8px!important;
+}
+#apiResponseModal .form-control::placeholder,
+.modal-body .form-control::placeholder{color:#9d86b1!important}
+#apiResponseModal .form-control:focus,
+#apiResponseModal .form-select:focus,
+.modal-body .form-control:focus,
+.modal-body .form-select:focus{
+  border-color:#c77aff!important;
+  box-shadow:0 0 0 .2rem rgba(189,92,255,.16)!important;
+}
+#apiResponseModal .form-select option,
+.modal-body .form-select option{background:#10071b;color:#fbf5ff}
+#apiResponseModal .btn-close,
+.modal-header .btn-close{filter:invert(1) grayscale(1);opacity:.8}
+#apiResponseModal #submitQueryBtn,
+#submitQueryBtn{
+  color:#10051b!important;
+  background:linear-gradient(110deg,#d18aff,#963bea)!important;
+  border:1px solid rgba(221,175,255,.35)!important;
+  border-radius:8px!important;
+  box-shadow:0 0 20px rgba(189,92,255,.22)!important;
+}
+#apiResponseModal #submitQueryBtn:hover,
+#submitQueryBtn:hover{filter:brightness(1.1)}
+.modal-backdrop.show{opacity:.82;background:#030008!important}
+#apiResponseModal .text-info,
+#apiResponseModal .small.text-info{color:#d4a1ff!important}
+#apiResponseModal .api-request-card{
+  background:rgba(189,92,255,.055)!important;
+  border-color:rgba(189,92,255,.28)!important;
+}
+#apiResponseModal pre,
+#apiResponseModal code{color:#e7caff}
+@media(max-width:600px){
+  #apiResponseModal .modal-dialog{margin:8px}
+  #apiResponseModal .modal-content{border-radius:12px!important}
+}
