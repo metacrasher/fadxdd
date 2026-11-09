@@ -1,7 +1,7 @@
 {
-  "name": "FadXD API",
+  "name": "FadXD Downloader",
   "version": "v3.1.0",
-  "description": "Downloader dan layanan API FadXD — praktis, cepat, dan mudah digunakan.",
+  "description": "Unduh video dan musik dari YouTube, TikTok, Instagram, dan Spotify dengan mudah.",
   "apiSettings": {
     "creator": "FadStore",
     "apikey": [
@@ -10,28 +10,6 @@
   },
   "links": [],
   "categories": [
-    {
-      "name": "SYSTEM",
-      "items": [
-        {
-          "id": "status",
-          "name": "Status API",
-          "desc": "Pantau kondisi server FadXD secara langsung.",
-          "path": "/api/status"
-        }
-      ]
-    },
-    {
-      "name": "PAYMENT",
-      "items": [
-        {
-          "id": "cekstatus",
-          "name": "Cek Status Pembayaran",
-          "desc": "Periksa transaksi QRIS Orderkuota menggunakan kredensial Anda.",
-          "path": "/orderkuota/cekstatus?apikey=&merchant=&keyorkut="
-        }
-      ]
-    },
     {
       "name": "SOCIAL MEDIA DOWNLOADER",
       "items": [
