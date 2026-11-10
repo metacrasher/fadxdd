@@ -177,6 +177,11 @@ function renderCategories(categories) {
 
     categories.forEach((category, categoryIndex) => {
         if (!category || !Array.isArray(category.items)) return;
+        // Spotify tetap tersedia di konfigurasi/API, tetapi tidak ditampilkan pada halaman publik.
+        const visibleItems = category.items.filter(item =>
+            String(item?.id || '').trim().toLowerCase() !== 'spotify'
+        );
+        if (visibleItems.length === 0) return;
         const section = document.createElement('section');
         section.className = 'api-category mb-5';
         section.dataset.category = category.name || '';
@@ -187,7 +192,7 @@ function renderCategories(categories) {
         title.textContent = category.name || `Category ${categoryIndex + 1}`;
         const count = document.createElement('span');
         count.className = 'category-count';
-        count.textContent = `${category.items.length} SERVICES`;
+        count.textContent = `${visibleItems.length} SERVICES`;
         heading.append(title, count);
         if (String(category.name || '').trim().toLowerCase() === 'social media downloader') {
             const legend = document.createElement('div');
@@ -199,7 +204,7 @@ function renderCategories(categories) {
         const grid = document.createElement('div');
         grid.className = 'api-grid';
 
-        category.items.forEach(item => {
+        visibleItems.forEach(item => {
             if (!item || !item.path) return;
             const card = document.createElement('article');
             card.className = 'api-item';
