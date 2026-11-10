@@ -1,7 +1,7 @@
 {
   "name": "FadXD Downloader",
   "version": "v3.1.0",
-  "description": "Unduh video dan musik dari YouTube, TikTok, Instagram, dan Spotify dengan mudah.",
+  "description": "Unduh video dan musik dari YouTube, TikTok, dan Instagram dengan mudah.",
   "apiSettings": {
     "creator": "FadStore",
     "apikey": [
